@@ -5,8 +5,8 @@
 
 ## Decisión
 
-Nombrar el producto KnoGDB (Known Games DataBase), bajo la organización KnownXDB.
-El repositorio canónico será KnownXDB/KnoGDB. KnownXDB representa Know, una entidad
+Nombrar el producto KnownGDB (Known Games DataBase), bajo la organización KnownXDB.
+El repositorio canónico será KnownXDB/KnownGDB. KnownXDB representa Know, una entidad
 X y DB, con capacidad de organizar verticales independientes. Nombres futuros son
 tentativos y no forman parte del alcance implementado.
 
