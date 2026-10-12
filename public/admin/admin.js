@@ -110,4 +110,3 @@ document.querySelector('#logout').addEventListener('click', () => void action(as
 }));
 const assetWorkspace=createAssetWorkspace({api,action});
 void action(async () => { await api('session'); await load(); });
-
