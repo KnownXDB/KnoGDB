@@ -33,6 +33,8 @@ Spanish; reviewed English and Spanish documentation is planned before publicatio
 - [Product policies](docs/PRODUCT-PLAN.md)
 - [Next step](docs/NEXT-STEP.md)
 - [Architecture decisions](docs/adr/)
+- [Initial hosting](docs/adr/0005-initial-hosting.md)
+- [Asset languages and originals](docs/adr/0006-asset-language-classification.md)
 - [Contributing](CONTRIBUTING.md)
 - [Agent instructions](AGENTS.md)
 - [Versioning](VERSIONING.md)

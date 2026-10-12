@@ -33,6 +33,8 @@ implementada. KnoGDB es autónomo y prioriza cobertura desktop.
 - Storage privado, metadata, checksums y descarga por API.
 - Localización, regiones, eventos, vigencia e historial inmutable.
 - Expiración y fallback deterministas; caché sin exponer credenciales.
+- Clasificación por idioma o Global (sin idioma), verificada en moderación.
+- Priorizar originales oficiales por API y web; declarar comunidad y derivados.
 
 ## Fase 4 — Acceso y contribuciones
 
