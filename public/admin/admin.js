@@ -67,10 +67,14 @@ async function load() {
   for(const game of data){const name=game.localizations.find(l=>l.is_primary)?.title ?? game.id;picker.add(new Option(name,game.id));}
   if([...picker.options].some(option=>option.value===previous))picker.value=previous;
 }
-async function action(work) {
-  if (busy) return; busy = true; message.textContent = '';
+async function action(work, feedback=message) {
+  if (busy) return; busy = true; message.textContent = ''; feedback.textContent='';
   for (const button of document.querySelectorAll('button')) button.disabled = true;
-  try { await work(); } catch (error) { message.textContent = error instanceof Error ? error.message : 'The request failed.'; }
+  try { await work(); } catch (error) {
+    const text=error instanceof Error ? error.message : 'The request failed.';
+    message.textContent=text;feedback.textContent=text;
+    if(feedback!==message&&!document.querySelector('#assets-panel').hidden)feedback.scrollIntoView({block:'nearest'});
+  }
   finally { busy = false; for (const button of document.querySelectorAll('button')) button.disabled = false; }
 }
 loginForm.addEventListener('submit', event => {
@@ -105,6 +109,13 @@ void action(async () => { await api('session'); await load(); });
 const assetForm=document.querySelector('#asset-form');
 const reviewForm=document.querySelector('#review-form');
 const gamePicker=document.querySelector('#asset-game');
+const assetMessage=document.querySelector('#asset-message');
+const reviewMessage=document.querySelector('#review-message');
+const icoMessage='ICO import is not available yet. Client icons currently require a 256 × 256 PNG or JPEG.';
+assetForm.elements.namedItem('file').addEventListener('change',()=>{
+  const file=assetForm.elements.namedItem('file').files[0];
+  assetMessage.textContent=file?.name.toLowerCase().endsWith('.ico')?icoMessage:'';
+});
 let reviewAsset=null;
 let previewObject=null;
 let pendingUpload=null;
@@ -131,10 +142,10 @@ async function loadAssets(){
       const response=await fetch(grant.preview_url,{headers:{Authorization:`Bearer ${grant.preview_grant}`},credentials:'omit',referrerPolicy:'no-referrer'});
       if(!response.ok)throw new Error('The private preview could not be loaded.');
       previewObject=URL.createObjectURL(await response.blob());const image=document.querySelector('#asset-preview');image.src=previewObject;image.hidden=false;
-    }));item.append(button);list.append(item);
+    },reviewMessage));item.append(button);list.append(item);
   }
 }
-gamePicker.addEventListener('change',()=>void action(loadAssets));
+gamePicker.addEventListener('change',()=>void action(loadAssets,assetMessage));
 assetForm.elements.namedItem('language_kind').addEventListener('change',()=>{
   const tags=assetForm.elements.namedItem('language_tags');const global=assetForm.elements.namedItem('language_kind').value==='global';
   tags.disabled=global;tags.required=!global;if(global)tags.value='';
@@ -143,11 +154,12 @@ assetForm.elements.namedItem('language_tags').required=true;
 async function completeUpload(){
   if(!pendingUpload)return;
   await api('assets/complete',{id:pendingUpload});pendingUpload=null;document.querySelector('#retry-asset').hidden=true;
-  await loadAssets();assetForm.elements.namedItem('file').value='';message.textContent='Original uploaded and validated. It is private and awaiting review.';
+  await loadAssets();assetForm.elements.namedItem('file').value='';assetMessage.textContent='Original uploaded and validated. It is private and awaiting review.';
 }
 assetForm.addEventListener('submit',event=>{event.preventDefault();void action(async()=>{
   if(!gamePicker.value)throw new Error('Choose a title before uploading.');
   const form=new FormData(assetForm),file=form.get('file');
+  if(file instanceof File&&file.name.toLowerCase().endsWith('.ico'))throw new Error(icoMessage);
   if(!(file instanceof File)||!file.size||file.size>16*1024*1024||!['image/png','image/jpeg'].includes(file.type))throw new Error('Choose a PNG or JPEG file up to 16 MiB.');
   const dimensions={header:[920,430],capsule:[600,900],hero:[3840,1240],icon:[32,32],client_icon:[256,256]};
   const expected=dimensions[form.get('role')];
@@ -157,15 +169,15 @@ assetForm.addEventListener('submit',event=>{event.preventDefault();void action(a
   const prepared=await api('assets/prepare',{game_id:gamePicker.value,role:form.get('role'),mime_type:file.type,byte_size:file.size,checksum_sha256:hash,
     language_kind:form.get('language_kind'),language_tags:global?[]:String(form.get('language_tags')).split(',').map(tag=>tag.trim()).filter(Boolean),
     provenance:form.get('provenance'),source_reference:form.get('source_reference'),confidence:Number(form.get('confidence'))});
-  message.textContent='Uploading original…';
+  assetMessage.textContent='Uploading original…';
   const response=await fetch(prepared.upload_url,{method:'PUT',headers:{Authorization:`Bearer ${prepared.upload_grant}`,'Content-Type':file.type},body:bytes,credentials:'omit',referrerPolicy:'no-referrer'});
   if(!response.ok)throw new Error('The original upload failed. Check the connection and try again.');
   pendingUpload=prepared.id;document.querySelector('#retry-asset').hidden=false;
-  message.textContent='Validating original…';await completeUpload();
-});});
-document.querySelector('#retry-asset').addEventListener('click',()=>void action(completeUpload));
+  assetMessage.textContent='Validating original…';await completeUpload();
+},assetMessage);});
+document.querySelector('#retry-asset').addEventListener('click',()=>void action(completeUpload,assetMessage));
 reviewForm.addEventListener('submit',event=>{event.preventDefault();void action(async()=>{
   if(!reviewAsset)return;const form=new FormData(reviewForm);const toDate=name=>form.get(name)?new Date(String(form.get(name))).toISOString():null;
   await api('assets/review',{id:reviewAsset.id,decision:form.get('decision'),publish:form.has('publish'),rights_reference:form.get('rights_reference'),reason:form.get('reason'),valid_from:toDate('valid_from'),valid_until:toDate('valid_until')});
-  await loadAssets();message.textContent='Review saved. Public delivery also requires a published title and an active validity window.';
-});});
+  await loadAssets();assetMessage.textContent='Review saved. Public delivery also requires a published title and an active validity window.';
+},reviewMessage);});

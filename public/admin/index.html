@@ -58,6 +58,7 @@
         <label>Asset confidence (0–1)<input name="confidence" type="number" min="0" max="1" step="0.001" value="1" required></label>
         <button type="submit">Upload for review</button>
         <button id="retry-asset" type="button" hidden>Retry validation</button>
+        <p id="asset-message" class="form-message" role="status" aria-live="polite"></p>
       </form>
       <div>
         <h3>Review assets</h3><ul id="assets"></ul>
@@ -71,6 +72,7 @@
           <label>Valid from (optional)<input name="valid_from" type="datetime-local"></label>
           <label>Valid until (optional)<input name="valid_until" type="datetime-local"></label>
           <button type="submit">Save review</button>
+          <p id="review-message" class="form-message" role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
