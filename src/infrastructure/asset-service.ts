@@ -73,11 +73,11 @@ export function createAssetService(projectUrl:string,secret:string,workerUrl:str
       }
       if(route==='review') {
         if(!uuid(body.id)||!['approved','rejected','withdrawn'].includes(String(body.decision))||
-          typeof body.publish!=='boolean'||typeof body.reason!=='string'||!body.reason.trim()||body.reason.length>2000||
+          typeof body.publish!=='boolean'||(body.reason!=null && (typeof body.reason!=='string'||body.reason.length>2000))||
           typeof body.rights_reference!=='string'||body.rights_reference.length>4000)throw new Error('invalid_request');
         if(body.publish&&(body.decision!=='approved'||!body.rights_reference.trim()))throw new Error('rights_required');
         return {id:await rpc('admin_asset_review',actor,{p_asset:body.id,p_decision:body.decision,p_publish:body.publish,
-          p_rights:body.rights_reference,p_reason:body.reason.trim(),p_from:date(body.valid_from),p_until:date(body.valid_until)})};
+          p_rights:body.rights_reference,p_reason:typeof body.reason==='string'?body.reason.trim()||null:null,p_from:date(body.valid_from),p_until:date(body.valid_until)})};
       }
       throw new Error('not_found');
     },

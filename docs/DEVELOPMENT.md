@@ -179,3 +179,10 @@ Final suite: 28 tests and exact-source repository-policy CI passed. No actual
 private signing value was printed or stored in Git; directory/history secret scans
 reported no findings. The maintainer must perform the first real upload/review and
 verify the downloaded checksum. No production promotion or release tag was made.
+
+Review reason is optional as of migration
+20261012211104_optional_asset_review_reason.sql. Blank/omitted explanations are
+stored as JSON null; no rationale is fabricated. Actor, decision, timestamp and
+publication state remain audited, and distribution rights remain required for
+publication. Rollback checks verified approval/rejection without an explanation
+and withdrawal with an explanation, preserving the audit record.

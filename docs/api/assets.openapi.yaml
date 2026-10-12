@@ -116,13 +116,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [id, decision, publish, rights_reference, reason]
+              required: [id, decision, publish, rights_reference]
               properties:
                 id: { type: string, format: uuid }
                 decision: { type: string, enum: [approved, rejected, withdrawn] }
                 publish: { type: boolean }
                 rights_reference: { type: string, maxLength: 4000 }
-                reason: { type: string, minLength: 1, maxLength: 2000 }
+                reason: { type: [string, 'null'], maxLength: 2000, description: Optional reviewer explanation. }
                 valid_from: { type: [string, 'null'], format: date-time }
                 valid_until: { type: [string, 'null'], format: date-time }
       responses:
