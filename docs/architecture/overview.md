@@ -31,6 +31,18 @@ Separar archivo inmutable, pieza editorial y asignación al título o release.
 La asignación contiene rol, idioma, región y vigencia; temporada o evento son
 contextos, no nuevas identidades. Historial de revisión y publicación separado.
 
+Global es clasificación sin idioma; no representa región. Clasificar cada pieza
+por contenido como Global o localizada con etiquetas de idioma verificadas.
+Priorizar originales oficiales aprobados por API y web; declarar procedencia,
+clasificación efectiva y rendición original/derivada. ADR 0006 define el contrato.
+
+## Alojamiento inicial
+
+Web, admin y API en servicios separados; base relacional junto al backend y
+object storage privado independiente. ADR 0005 registra proveedores y requisitos.
+No hay infraestructura provisionada ni dominio contratado. El panel de KnoGDB
+administra planes y contenido; las consolas de infraestructura administran hosting.
+
 ## Administración y API
 
 El MVP administrativo gestiona catálogo, assets, moderación, usuarios, roles,

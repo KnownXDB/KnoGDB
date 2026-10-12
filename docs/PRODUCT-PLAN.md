@@ -25,6 +25,16 @@ Archivos inmutables con checksum. Asignaciones por juego o release, idioma,
 región y vigencia. Eventos y temporadas no cambian Game.id. Mantener asset base
 y fallback determinista tras expiración. La API declara idioma y contexto efectivo.
 
+Global significa sin idioma: contenido sin texto lingüístico. No es una región ni
+un idioma desconocido. Cada pieza se clasifica como Global o por idiomas reales;
+EN, ES y variantes localizadas pertenecen al mismo Game. Ningún rol es Global
+por defecto. Contributors eligen idioma o Global y moderación verifica la elección.
+
+API y web priorizan originales oficiales aprobados, con derechos de distribución.
+Separar procedencia oficial/comunitaria de original/derivado. No presentar una
+imagen normalizada como original ni publicar fuentes incompatibles automáticamente.
+Consultar ADR 0006 para modelo, filtros, fallback y criterios de aceptación.
+
 ## Moderación
 
 Validar firma, decodificación, formato, dimensiones, proporción, transparencia,
