@@ -36,9 +36,15 @@ service key as a browser-public variable.
 
 ## Database
 
-Review and apply supabase/migrations/202610120001_catalog_foundation.sql to an
-empty development project. Do not apply it to unrelated or production data.
-The migration has not been executed against a real PostgreSQL instance yet.
+Migration 20261012194157_catalog_foundation.sql was applied through the Supabase
+connector on 2026-10-12 to the confirmed empty application schemas. Its local
+version matches remote migration history. Do not apply it again to that project.
+Three private tables and a security-invoker publication view were verified:
+anonymous and authenticated roles cannot read them; the backend role can.
+Rollback-only checks verified homonymous titles, draft exclusion and language
+constraints without retaining synthetic records. RLS without policies is intentional
+for these backend-only tables; the security advisor reports three informational
+notices, not a grant of public access.
 No production records or default administrator are seeded. Further increments
 will add organizations, genres, releases and audited admin transactions.
 
@@ -55,7 +61,7 @@ Do not expose Supabase tables directly to external clients.
 
 ## Outstanding deployment inputs
 
-Netlify account access is authorized; server-side secret configuration remains required.
+Netlify account access is authorized and server-side secret configuration is working.
 The user confirmed the Supabase project URL and the real R2 bucket. Secret values are never requested in
 chat. Hosted authentication, cross-origin cookies and upload behavior require
 real validation; local unit tests do not establish these capabilities.
@@ -84,11 +90,12 @@ The knowngdb Netlify project was created in the existing DevMe Free workspace.
 Local linkage is stored only in ignored .netlify files. GitHub auto-deploy has not
 been connected; this deployment was an explicit CLI preview, not production.
 
-Preview: https://6acd2fa71f968288f0afe804--knowngdb.netlify.app
+Preview: https://6acd3601809d393ebadbf582--knowngdb.netlify.app
 
-On 2026-10-12 the status page and /api/v1/health returned 200. /api/v1/games
-returned 503 catalog_not_configured because server credentials were absent.
-SUPABASE_URL is configured for preview functions only; it is not a credential.
-Add the server key privately before redeploying. Never use env:list or env:get to
-print secret values during verification. Do not add service-role credentials to
-build/public scopes or commit them to the repository.
+After applying the migration on 2026-10-12, /api/v1/games returned 200 with an
+empty data array. The server secret was never printed or copied into the repo.
+SUPABASE_URL is not a credential. SUPABASE_SECRET_KEY is marked secret in Netlify
+and populated only for Deploy Previews. The Free plan also exposes it to trusted
+preview builds and runtime; Functions-only scoping is unavailable on this plan.
+GitHub auto-deploy remains disconnected. Do not run untrusted preview code with
+this credential. Never print secret values or include them in frontend bundles.
