@@ -1,0 +1,10 @@
+# Normalize text in Git and keep LF in working trees on every platform.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.webp binary
+*.mp4 binary
+*.webm binary
+*.zip binary

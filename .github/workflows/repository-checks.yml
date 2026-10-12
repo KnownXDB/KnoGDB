@@ -1,0 +1,19 @@
+name: Repository checks
+on:
+  push:
+    branches: [develop, staging, main]
+  pull_request:
+    branches: [develop, staging, main]
+permissions:
+  contents: read
+jobs:
+  repository-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify repository policy
+        run: node scripts/verify-repository.mjs
+      - name: Verify whitespace
+        run: git diff --check
