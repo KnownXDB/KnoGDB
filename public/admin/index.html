@@ -53,7 +53,7 @@
         <label>Provenance<select id="batch-provenance"><option value="official">Official</option><option value="community">Community</option></select></label>
         <label>Source reference<input id="batch-source" maxlength="2000" placeholder="Official source URL or reference"></label>
       </div>
-      <div id="drop-zone"><label class="file-picker">Choose multiple files<input id="batch-files" type="file" multiple accept="image/png,image/jpeg,.ico"></label><span class="hint">or drop files here · PNG/JPEG · up to 16 MiB each</span></div>
+      <div id="drop-zone"><label class="file-picker">Choose multiple files<input id="batch-files" type="file" multiple accept="image/png,image/jpeg,image/vnd.microsoft.icon,image/x-icon,.ico"></label><span class="hint">or drop files here · PNG/JPEG · original ICO for Client Icon · up to 16 MiB each</span></div>
       <p class="hint">Dimensions suggest the role. Each file keeps its own language classification; Global means no linguistic text. Files remain private until reviewed.</p>
       <div id="upload-queue" class="upload-queue"></div>
       <div class="toolbar"><div><button id="upload-batch" type="button">Upload queued files</button><button id="clear-queue" class="secondary" type="button">Clear completed</button><button id="apply-language" class="secondary" type="button">Apply language to queue</button></div><span id="queue-count" class="hint"></span></div>

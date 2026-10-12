@@ -213,3 +213,13 @@ Global defaults, two valid uploads beside one incompatible file, single-request
 batch review, in-place large preview and readable controls at 1280px/390px.
 Authorized browser traffic was mocked; no synthetic public assets were retained.
 The user's existing real assets were not modified by the rollback tests.
+
+Native ICO Client Icon support supersedes earlier conversion/deferred statements
+(ADR 0011). Migration 20261012213419_original_ico_assets.sql adds the canonical MIME
+and Client Icon role restriction, and reserves original .ico keys. The API and
+Worker return unchanged originals. The shared uploader normalizes MIME hints,
+automatically proposes Client Icon when the directory contains 256px, and the
+server validates every embedded image before registration. No conversion occurs.
+33 tests pass; rollback SQL confirms native .ico registration and role rejection.
+Local AION 2 ICO validation passed for seven images with unchanged original hash.
+Real administrator upload/preview acceptance remains to be confirmed after deploy.

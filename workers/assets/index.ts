@@ -18,10 +18,10 @@ async function verify(token:string,env:Environment):Promise<Grant> {
   if(!await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,decode(signature),new TextEncoder().encode(payload))) throw new Error('invalid_grant');
   const grant=JSON.parse(new TextDecoder().decode(decode(payload))) as Grant;
   const now=Math.floor(Date.now()/1000);
-  if(!/^originals\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg)$/.test(grant.key) ||
+  if(!/^originals\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg|ico)$/.test(grant.key) ||
     !Number.isInteger(grant.expires) || grant.expires<=now || grant.expires>now+300 ||
     !Number.isInteger(grant.bytes) || grant.bytes<1 || grant.bytes>maxBytes ||
-    !/^[a-f0-9]{64}$/.test(grant.checksum) || !['image/png','image/jpeg'].includes(grant.mime)) throw new Error('invalid_grant');
+    !/^[a-f0-9]{64}$/.test(grant.checksum) || !['image/png','image/jpeg','image/vnd.microsoft.icon'].includes(grant.mime)) throw new Error('invalid_grant');
   return grant;
 }
 async function boundedBody(request:Request,limit:number) {

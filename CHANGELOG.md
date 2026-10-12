@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-alpha.3 — Development candidate
+
+- Native original ICO uploads, validation, previews and file delivery for Client Icon.
+- Multi-resolution containers retain exact original bytes without conversion.
+
 ## 0.1.0-alpha.2 — Development candidate
 
 - Private original asset upload intents and immutable storage grants.

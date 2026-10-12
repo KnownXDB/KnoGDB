@@ -14,7 +14,7 @@ const errors = {
   publication_requires_review: 'Publishing requires an approved primary translation.',
   invalid_request: 'Check the fields and try again.',
   invalid_origin: 'The request could not be verified. Reload this page.',
-  invalid_asset: 'The file could not be decoded as a valid, single-frame PNG or JPEG.',
+  invalid_asset: 'The file is not a valid PNG, JPEG or supported ICO.',
   invalid_asset_dimensions: 'The image dimensions do not match the selected role.',
   invalid_logo: 'Logos require transparency, no transparent border, and a visible side of at least 1280 pixels.',
   rights_required: 'Publishing requires a distribution rights reference.',

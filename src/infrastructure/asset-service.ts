@@ -110,7 +110,8 @@ export function createAssetService(projectUrl:string,secret:string,workerUrl:str
         if(!Array.isArray(rows))throw new Error('service_unavailable');
         if(download) {
           const asset=rows[0];if(!asset)return json({error:'asset_not_found'},404);
-          const key=`originals/${asset.game_id}/${asset.id}.${asset.mime_type==='image/png'?'png':'jpg'}`;
+          const extension=asset.mime_type==='image/png'?'png':asset.mime_type==='image/vnd.microsoft.icon'?'ico':'jpg';
+          const key=`originals/${asset.game_id}/${asset.id}.${extension}`;
           const location=new URL('/api/v1/files',worker);location.searchParams.set('grant',fileGrant(asset,key,'public'));
           return new Response(null,{status:302,headers:{Location:location.href,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','Access-Control-Allow-Origin':'*'}});
         }

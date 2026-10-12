@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { parseAssetLanguage } from './asset-language.js';
+import { validateIco } from './ico-policy.js';
 export const maxAssetBytes = 16 * 1024 * 1024;
 export const roles = ['header','capsule','hero','logo','icon','client_icon'] as const;
 export type AssetRole = typeof roles[number];
@@ -9,7 +10,8 @@ const dimensions: Partial<Record<AssetRole, readonly [number,number]>> = {
 export function assetMetadata(value: Record<string,unknown>) {
   if (typeof value.game_id !== 'string' || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value.game_id) ||
       !roles.includes(value.role as AssetRole) || !['official','community'].includes(String(value.provenance)) ||
-      !['image/png','image/jpeg'].includes(String(value.mime_type)) ||
+      !['image/png','image/jpeg','image/vnd.microsoft.icon'].includes(String(value.mime_type)) ||
+      (value.mime_type==='image/vnd.microsoft.icon'&&value.role!=='client_icon') ||
       typeof value.byte_size !== 'number' || !Number.isInteger(value.byte_size) || value.byte_size<1 || value.byte_size>maxAssetBytes ||
       typeof value.checksum_sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.checksum_sha256) ||
       typeof value.source_reference !== 'string' || !value.source_reference.trim() || value.source_reference.length>2000 ||
@@ -25,6 +27,10 @@ export function assetMetadata(value: Record<string,unknown>) {
 export async function validateAsset(bytes: Uint8Array, role: AssetRole, mime: string) {
   if (!bytes.byteLength || bytes.byteLength>maxAssetBytes) throw new Error('invalid_asset');
   try {
+    if(mime==='image/vnd.microsoft.icon'){
+      if(role!=='client_icon')throw new Error('invalid_asset');
+      return await validateIco(bytes);
+    }
     const image = sharp(bytes,{limitInputPixels:16000000,failOn:'warning',animated:true});
     const metadata = await image.metadata();
     if (!metadata.width || !metadata.height || (metadata.pages ?? 1)!==1 ||

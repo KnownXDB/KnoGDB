@@ -13,8 +13,8 @@ Estas reglas definen alcance acordado; no capacidades implementadas.
 | icon | 32 × 32 | Representación pequeña |
 | client_icon | 256 × 256 | Aplicación o acceso directo |
 
-JPEG o PNG para imágenes opacas; PNG para logos y transparencia. ICO puede
-ingresar para client_icon mediante extracción validada a PNG. No ampliar fuentes
+JPEG o PNG para imágenes opacas; PNG para logos y transparencia. ICO se admite como original para client_icon, sin conversión, conservando todas
+sus imágenes internas y requiriendo una imagen de 256 × 256. No ampliar fuentes
 insuficientes. Logos se recortan al contenido visible sin distorsión; umbral alfa,
 tolerancia y máximo de tamaño se definirán antes del validador.
 WebP, vídeo y animación quedan fuera de la primera etapa.

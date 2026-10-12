@@ -4,6 +4,8 @@ const stateNames={in_review:'Pending review',submitted:'Submitted',approved:'App
 const element=(tag,text,className)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;};
 const label=(text,control)=>{const node=element('label',text);node.append(control);return node;};
 const tags=value=>value.split(',').map(tag=>tag.trim()).filter(Boolean);
+const icoMime='image/vnd.microsoft.icon';
+const fileMime=file=>file.name.toLowerCase().endsWith('.ico')||['image/x-icon',icoMime].includes(file.type)?icoMime:file.type;
 
 export function createAssetWorkspace({api,action}){
   const picker=document.querySelector('#asset-game'),fileInput=document.querySelector('#batch-files');
@@ -59,13 +61,22 @@ export function createAssetWorkspace({api,action}){
     if(queue.length+files.length>30)throw Error('Add up to 30 files per queue.');
     for(const file of files){
       const language=commonLanguage();const item={file,role:'',kind:language.kind,tags:language.tags,status:'queued',error:null,preview:null,uploadId:null,stored:false};
-      if(file.name.toLowerCase().endsWith('.ico')){item.status='error';item.error='ICO import is not available yet. Use PNG or JPEG.';}
-      else if(!['image/png','image/jpeg'].includes(file.type)||!file.size||file.size>16*1024*1024){item.status='error';item.error='Choose PNG/JPEG up to 16 MiB.';}
+      item.mime=fileMime(file);
+      if(!['image/png','image/jpeg',icoMime].includes(item.mime)||!file.size||file.size>16*1024*1024){item.status='error';item.error='Choose PNG, JPEG or ICO up to 16 MiB.';}
       else {
-        item.preview=URL.createObjectURL(file);
-        try{const bitmap=await createImageBitmap(file);item.width=bitmap.width;item.height=bitmap.height;bitmap.close();
+        item.preview=URL.createObjectURL(new Blob([file],{type:item.mime}));
+        try{
+          if(item.mime===icoMime){
+            const bytes=await file.arrayBuffer(),view=new DataView(bytes);let compatible=false;
+            if(bytes.byteLength<22||view.getUint16(0,true)!==0||view.getUint16(2,true)!==1)throw Error('Invalid ICO container.');
+            const count=view.getUint16(4,true);if(count<1||count>64||6+count*16>bytes.byteLength)throw Error('Invalid ICO directory.');
+            for(let index=0;index<count;index++){const entry=6+index*16;if((view.getUint8(entry)||256)===256&&(view.getUint8(entry+1)||256)===256)compatible=true;}
+            if(!compatible)throw Error('Client Icon ICO must contain a 256 × 256 image.');
+            item.width=256;item.height=256;item.role='client_icon';
+          }else{const bitmap=await createImageBitmap(file);item.width=bitmap.width;item.height=bitmap.height;bitmap.close();
           item.role=Object.keys(dimensions).find(role=>dimensions[role][0]===item.width&&dimensions[role][1]===item.height)??(file.name.toLowerCase().includes('logo')?'logo':'');
-        }catch{item.status='error';item.error='The image could not be decoded.';}
+          }
+        }catch(error){item.status='error';item.error=error instanceof Error?error.message:'The image could not be decoded.';}
       }
       queue.push(item);
     }
@@ -74,18 +85,18 @@ export function createAssetWorkspace({api,action}){
   async function upload(item,game){
     item.error=null;
     try{
-      if(item.file.name.toLowerCase().endsWith('.ico'))throw Error('ICO import is not available yet. Use PNG or JPEG.');
-      if(!['image/png','image/jpeg'].includes(item.file.type)||!item.file.size||item.file.size>16*1024*1024)throw Error('Choose PNG/JPEG up to 16 MiB.');
+      if(!['image/png','image/jpeg',icoMime].includes(item.mime)||!item.file.size||item.file.size>16*1024*1024)throw Error('Choose PNG, JPEG or ICO up to 16 MiB.');
       if(!item.role)throw Error('Choose a role for this file.');
+      if(item.mime===icoMime&&item.role!=='client_icon')throw Error('ICO files are supported for Client Icon.');
       const expected=dimensions[item.role];if(expected&&(item.width!==expected[0]||item.height!==expected[1]))throw Error(`${roleNames[item.role]} requires ${expected[0]} × ${expected[1]} pixels.`);
       if(item.kind==='localized'&&!item.tags.length)throw Error('Choose a language or Global for this file.');
       item.status='uploading';renderQueue();
       if(!item.stored){
         const bytes=await item.file.arrayBuffer();const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),byte=>byte.toString(16).padStart(2,'0')).join('');
-        const prepared=await api('assets/prepare',{game_id:game,role:item.role,mime_type:item.file.type,byte_size:item.file.size,checksum_sha256:hash,
+        const prepared=await api('assets/prepare',{game_id:game,role:item.role,mime_type:item.mime,byte_size:item.file.size,checksum_sha256:hash,
           language_kind:item.kind,language_tags:item.kind==='global'?[]:item.tags,provenance:provenance.value,source_reference:source.value,confidence:1});
         item.uploadId=prepared.id;
-        const response=await fetch(prepared.upload_url,{method:'PUT',headers:{Authorization:`Bearer ${prepared.upload_grant}`,'Content-Type':item.file.type},body:bytes,credentials:'omit',referrerPolicy:'no-referrer'});
+        const response=await fetch(prepared.upload_url,{method:'PUT',headers:{Authorization:`Bearer ${prepared.upload_grant}`,'Content-Type':item.mime},body:bytes,credentials:'omit',referrerPolicy:'no-referrer'});
         if(!response.ok&&response.status!==409)throw Error('Upload failed. Retry this file.');
         item.stored=true;
       }
