@@ -7,7 +7,7 @@ issues, pull requests, comments, wikis, discussions or forums. Review logs befor
 sharing them.
 
 Use **Report a vulnerability** in the canonical repository's Security tab:
-https://github.com/KnownXDB/KnoGDB/security/advisories/new.
+https://github.com/KnownXDB/KnownGDB/security/advisories/new.
 Private reporting is enabled. If it is unavailable, contact the maintainer through
 a verified private channel; do not disclose the finding publicly. No security
 email address has been designated. Report delivery has not been tested and must
@@ -50,6 +50,6 @@ automatically.
 
 ## Supported versions and implementation status
 
-KnoGDB is currently a documentation and planning project, with no deployed service
+KnownGDB is currently a documentation and planning project, with no deployed service
 or supported production release. The administrative controls described here are
 implementation requirements, not verified service capabilities.

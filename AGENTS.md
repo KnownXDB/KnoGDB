@@ -2,7 +2,7 @@
 
 ## Alcance
 
-KnoGDB es un servicio autónomo de catálogo canónico, identidad y assets de
+KnownGDB es un servicio autónomo de catálogo canónico, identidad y assets de
 videojuegos. Ningún consumidor externo determina el modelo del dominio.
 
 ## Reglas obligatorias

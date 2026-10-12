@@ -3,16 +3,16 @@
 ## Identidad
 
 KnownXDB es la organización paraguas de bases de conocimiento por entidad.
-KnoGDB significa Known Games DataBase y prioriza juegos desktop. Las verticales
+KnownGDB significa Known Games DataBase y prioriza juegos desktop. Las verticales
 futuras son tentativas; no crear repositorios vacíos para ellas ni acoplar su dominio.
 
 ## Repositorios e interfaces
 
-KnoGDB conserva inicialmente API, web pública, administración, contratos y
+KnownGDB conserva inicialmente API, web pública, administración, contratos y
 documentación en un monorepo. Separar repositorios solo por ciclo de release,
 permisos o responsables independientes. Nunca versionar secretos en ningún repo.
 
-El proyecto GitHub KnoGDB coordina las fases del ROADMAP. Usar estados Todo,
+El proyecto GitHub KnownGDB coordina las fases del ROADMAP. Usar estados Todo,
 In Progress y Done. Las tarjetas de planificación no equivalen a tareas completadas.
 Issues describen entregables verificables; PRs enlazan issues y evidencia.
 

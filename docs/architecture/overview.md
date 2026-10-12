@@ -1,6 +1,6 @@
 # Arquitectura
 
-KnoGDB es un monolito modular autónomo. Los clientes y las interfaces web usan
+KnownGDB es un monolito modular autónomo. Los clientes y las interfaces web usan
 una API versionada. La base relacional guarda entidades, procedencia, decisiones
 e historial; object storage privado conserva originales y derivados.
 

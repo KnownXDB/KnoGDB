@@ -1,6 +1,6 @@
 # Versionado
 
-KnoGDB usa Semantic Versioning (`MAJOR.MINOR.PATCH`) para releases de software y
+KnownGDB usa Semantic Versioning (`MAJOR.MINOR.PATCH`) para releases de software y
 contratos públicos.
 
 - `MAJOR`: cambio incompatible.
