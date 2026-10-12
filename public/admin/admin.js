@@ -134,9 +134,6 @@ async function loadAssets(){
       reviewForm.elements.namedItem('publish').checked=asset.publication_status==='published';
       reviewForm.elements.namedItem('rights_reference').value=asset.rights_reference ?? '';
       document.querySelector('#asset-details').textContent=`${asset.width} × ${asset.height} · ${asset.mime_type} · ${(asset.byte_size/1024).toFixed(1)} KiB · ${asset.rendition} · ID: ${asset.id}`;
-      for(const field of ['valid_from','valid_until'])if(asset[field]){
-        const value=new Date(asset[field]);value.setMinutes(value.getMinutes()-value.getTimezoneOffset());reviewForm.elements.namedItem(field).value=value.toISOString().slice(0,16);
-      }
       reviewForm.hidden=false;
       const grant=await api('assets/preview',{id:asset.id,game_id:gamePicker.value});
       const response=await fetch(grant.preview_url,{headers:{Authorization:`Bearer ${grant.preview_grant}`},credentials:'omit',referrerPolicy:'no-referrer'});
@@ -177,7 +174,7 @@ assetForm.addEventListener('submit',event=>{event.preventDefault();void action(a
 },assetMessage);});
 document.querySelector('#retry-asset').addEventListener('click',()=>void action(completeUpload,assetMessage));
 reviewForm.addEventListener('submit',event=>{event.preventDefault();void action(async()=>{
-  if(!reviewAsset)return;const form=new FormData(reviewForm);const toDate=name=>form.get(name)?new Date(String(form.get(name))).toISOString():null;
-  await api('assets/review',{id:reviewAsset.id,decision:form.get('decision'),publish:form.has('publish'),rights_reference:form.get('rights_reference'),reason:form.get('reason'),valid_from:toDate('valid_from'),valid_until:toDate('valid_until')});
-  await loadAssets();assetMessage.textContent='Review saved. Public delivery also requires a published title and an active validity window.';
+  if(!reviewAsset)return;const form=new FormData(reviewForm);
+  await api('assets/review',{id:reviewAsset.id,decision:form.get('decision'),publish:form.has('publish'),rights_reference:form.get('rights_reference'),reason:form.get('reason'),valid_from:reviewAsset.valid_from??null,valid_until:reviewAsset.valid_until??null});
+  await loadAssets();assetMessage.textContent='Review saved. Public delivery also requires a published title.';
 },reviewMessage);});
