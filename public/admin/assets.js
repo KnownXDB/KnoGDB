@@ -46,7 +46,7 @@ export function createAssetWorkspace({api,action}){
       languageKind.addEventListener('change',()=>{item.kind=languageKind.value;if(item.kind==='global')item.tags=[];renderQueue();});
       languageTags.addEventListener('input',()=>{item.tags=tags(languageTags.value);});
       const classification=element('div');classification.append(languageKind,languageTags);
-      const status=element('p',item.error??({queued:'Ready',uploading:'Uploading…',validating:'Validating…',done:'Uploaded · awaiting review',error:'Failed'}[item.status]),`queue-status ${item.status==='error'?'error':''}`);
+      const status=element('p',item.error??({queued:'Ready',uploading:'Uploading…',validating:'Validating…',done:'Uploaded',error:'Failed'}[item.status]),`queue-status ${item.status==='error'?'error':''}`);
       status.setAttribute('role','status');
       const remove=element('button','Remove','secondary');remove.type='button';remove.disabled=locked;remove.setAttribute('aria-label',`Remove ${item.file.name}`);
       remove.addEventListener('click',()=>{if(item.preview)URL.revokeObjectURL(item.preview);queue=queue.filter(row=>row!==item);renderQueue();});
@@ -129,7 +129,7 @@ export function createAssetWorkspace({api,action}){
   fileInput.addEventListener('change',()=>void run(async()=>{const files=[...fileInput.files];fileInput.value='';await addFiles(files);}));
   const drop=document.querySelector('#drop-zone');drop.addEventListener('dragover',event=>{event.preventDefault();drop.classList.add('dragging');});
   drop.addEventListener('dragleave',()=>drop.classList.remove('dragging'));drop.addEventListener('drop',event=>{event.preventDefault();drop.classList.remove('dragging');const files=[...event.dataTransfer.files];void run(()=>addFiles(files));});
-  kind.addEventListener('change',()=>{languages.disabled=kind.value==='global';});
+  kind.addEventListener('change',()=>{languages.disabled=kind.value==='global';if(kind.value==='global')languages.value='';});
   document.querySelector('#apply-language').addEventListener('click',()=>{const language=commonLanguage();for(const item of queue)if(item.status!=='done'&&!item.stored){item.kind=language.kind;item.tags=[...language.tags];}renderQueue();});
   document.querySelector('#clear-queue').addEventListener('click',()=>{for(const item of queue)if(item.status==='done'&&item.preview)URL.revokeObjectURL(item.preview);queue=queue.filter(item=>item.status!=='done');renderQueue();});
   picker.addEventListener('change',()=>void run(async()=>{clearQueue();source.value='';rights.value='';await load();}));
@@ -149,7 +149,7 @@ export function createAssetWorkspace({api,action}){
     const ids=[...selected];if(!ids.length)throw Error('Select assets to review.');
     const publish=button.dataset.publish==='true';if(publish&&!rights.value.trim())throw Error('Enter the distribution rights reference once for the selected assets.');
     const result=await api('assets/review-batch',{game_id:picker.value,ids,decision:button.dataset.decision,publish,rights_reference:rights.value,reason:reason.value});
-    await load();reviewFeedback.textContent=`${result.ids.length} assets reviewed${publish?' and published':''}.`;
+    await load();feedback.textContent='';reviewFeedback.textContent=`${result.ids.length} assets reviewed${publish?' and published':''}.`;
   },reviewFeedback));
   document.querySelector('#close-original').addEventListener('click',()=>dialog.close());
   return {setGames:value=>{games=value;},load,syncSelection,clear:()=>{disposeGallery();clearQueue();selected.clear();assets=[];grid.replaceChildren();syncSelection();}};
