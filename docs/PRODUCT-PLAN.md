@@ -4,19 +4,21 @@ Estas reglas definen alcance acordado; no capacidades implementadas.
 
 ## Assets iniciales
 
-| Rol | Dimensiones | Uso |
+| Rol | Dimensiones de referencia (no obligatorias) | Uso |
 | --- | --- | --- |
 | header | 920 × 430 | Tarjeta horizontal |
 | capsule | 600 × 900 | Portada vertical |
 | hero | 3840 × 1240 | Fondo panorámico |
-| logo | Lado dominante mínimo de 1280 en contenido visible | Marca transparente |
+| logo | Lado dominante de 1280 en contenido visible | Marca, preferentemente transparente |
 | icon | 32 × 32 | Representación pequeña |
 | client_icon | 256 × 256 | Aplicación o acceso directo |
 
-JPEG o PNG para imágenes opacas; PNG para logos y transparencia. ICO se admite como original para client_icon, sin conversión, conservando todas
-sus imágenes internas y requiriendo una imagen de 256 × 256. No ampliar fuentes
-insuficientes. Logos se recortan al contenido visible sin distorsión; umbral alfa,
-tolerancia y máximo de tamaño se definirán antes del validador.
+JPEG o PNG para cualquier rol; PNG admite transparencia. Las dimensiones,
+proporciones, transparencia y ausencia de márgenes son recomendaciones, no
+requisitos de subida. Se conservan los bytes y medidas originales sin ampliar,
+recortar ni convertir. ICO se admite como original para client_icon, conservando
+todas sus imágenes internas sin exigir una resolución concreta. Su metadata
+describe la imagen interna de mayor área. ADR 0012 define los límites técnicos.
 WebP, vídeo y animación quedan fuera de la primera etapa.
 
 ## Contexto e historial
@@ -37,8 +39,8 @@ Consultar ADR 0006 para modelo, filtros, fallback y criterios de aceptación.
 
 ## Moderación
 
-Validar firma, decodificación, formato, dimensiones, proporción, transparencia,
-límites de bytes y píxeles y duplicados exactos. Revisar legibilidad, composición,
+Validar firma, decodificación, formato, límites de bytes y píxeles y duplicados
+exactos. Las medidas y transparencia son referencias editoriales. Revisar legibilidad, composición,
 nitidez, correspondencia, marcas de agua y derechos de distribución.
 Traducir calidad editorial en criterios observables, no etiquetas subjetivas.
 

@@ -4,9 +4,6 @@ import { validateIco } from './ico-policy.js';
 export const maxAssetBytes = 16 * 1024 * 1024;
 export const roles = ['header','capsule','hero','logo','icon','client_icon'] as const;
 export type AssetRole = typeof roles[number];
-const dimensions: Partial<Record<AssetRole, readonly [number,number]>> = {
-  header:[920,430], capsule:[600,900], hero:[3840,1240], icon:[32,32], client_icon:[256,256],
-};
 export function assetMetadata(value: Record<string,unknown>) {
   if (typeof value.game_id !== 'string' || !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value.game_id) ||
       !roles.includes(value.role as AssetRole) || !['official','community'].includes(String(value.provenance)) ||
@@ -38,23 +35,9 @@ export async function validateAsset(bytes: Uint8Array, role: AssetRole, mime: st
         (metadata.orientation !== undefined && metadata.orientation!==1) ||
         (metadata.format!=='png' && metadata.format!=='jpeg') ||
         mime !== (metadata.format==='png'?'image/png':'image/jpeg')) throw new Error('invalid_asset');
-    const expected=dimensions[role];
-    if (expected && (metadata.width!==expected[0] || metadata.height!==expected[1])) throw new Error('invalid_asset_dimensions');
-    const {data,info}=await image.ensureAlpha().raw().toBuffer({resolveWithObject:true});
-    if (role==='logo') {
-      if (metadata.format!=='png' || !metadata.hasAlpha) throw new Error('invalid_logo');
-      let minX=info.width, minY=info.height, maxX=-1, maxY=-1, transparent=false;
-      for (let y=0;y<info.height;y++) for (let x=0;x<info.width;x++) {
-        const alpha=data[(y*info.width+x)*info.channels+info.channels-1]!;
-        if(alpha<255) transparent=true;
-        if(alpha>=8) {minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-      }
-      if (!transparent || Math.max(maxX-minX+1,maxY-minY+1)<1280 || minX!==0 || minY!==0 ||
-          maxX!==info.width-1 || maxY!==info.height-1) throw new Error('invalid_logo');
-    }
+    await image.raw().toBuffer();
     return {width:metadata.width,height:metadata.height,mime_type:mime,byte_size:bytes.byteLength};
-  } catch(error) {
-    if (error instanceof Error && ['invalid_asset_dimensions','invalid_logo'].includes(error.message)) throw error;
+  } catch {
     throw new Error('invalid_asset');
   }
 }

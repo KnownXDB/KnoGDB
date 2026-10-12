@@ -18,21 +18,24 @@ const key=`originals/${game}/${asset}.png`;
 const grant=(operation='upload',overrides={})=>signGrant({key,operation,expires:Math.floor(Date.now()/1000)+60,bytes:icon.length,checksum,mime:'image/png',origin,...overrides},privateKey);
 function storage(){let value=null,puts=0;return {get puts(){return puts;},async put(k,bytes,options){assert.equal(k,key);assert.deepEqual(options.onlyIf,{etagDoesNotMatch:'*'});if(value)return null;puts++;value=bytes;return {};},async get(k){assert.equal(k,key);return value?{body:new Response(value).body,size:value.length,httpEtag:'"fixture"',customMetadata:{sha256:checksum}}:null;}};}
 const request=(token,body=icon,requestOrigin=origin)=>new Request('https://files.example/api/v1/files',{method:'PUT',headers:{Authorization:`Bearer ${token}`,Origin:requestOrigin,'Content-Type':'image/png'},body});
-test('policy decodes valid originals and rejects mismatched dimensions, MIME and corrupt data',async()=>{
+test('policy accepts original dimensions while rejecting mismatched MIME and corrupt data',async()=>{
  assert.deepEqual(await validateAsset(icon,'icon','image/png'),{width:32,height:32,mime_type:'image/png',byte_size:icon.length});
- await assert.rejects(()=>validateAsset(icon,'header','image/png'),/invalid_asset_dimensions/);
+ for(const role of ['header','capsule','hero','icon','client_icon'])assert.equal((await validateAsset(icon,role,'image/png')).width,32);
  await assert.rejects(()=>validateAsset(icon,'icon','image/jpeg'),/invalid_asset/);
  await assert.rejects(()=>validateAsset(icon.subarray(0,30),'icon','image/png'),/invalid_asset/);
  const webp=await sharp(icon).webp().toBuffer();await assert.rejects(()=>validateAsset(webp,'icon','image/png'),/invalid_asset/);
 });
-test('logos require visible size, transparency and trimmed borders without changing original bytes',async()=>{
+test('logos preserve original dimensions, margins and transparency without rewriting bytes',async()=>{
  const data=Buffer.alloc(1280*40*4,255);data[3]=0;
  const logo=await sharp(data,{raw:{width:1280,height:40,channels:4}}).png().toBuffer();
  assert.equal((await validateAsset(logo,'logo','image/png')).width,1280);
  const padded=await sharp(logo).extend({top:2,bottom:2,left:2,right:2,background:{r:0,g:0,b:0,alpha:0}}).png().toBuffer();
- await assert.rejects(()=>validateAsset(padded,'logo','image/png'),/invalid_logo/);
+ assert.equal((await validateAsset(padded,'logo','image/png')).width,1284);
  const opaque=await sharp({create:{width:1280,height:40,channels:3,background:'#ffffff'}}).png().toBuffer();
- await assert.rejects(()=>validateAsset(opaque,'logo','image/png'),/invalid_logo/);
+ assert.equal((await validateAsset(opaque,'logo','image/png')).height,40);
+ const small=await sharp(icon).jpeg().toBuffer(),before=createHash('sha256').update(small).digest('hex');
+ assert.equal((await validateAsset(small,'logo','image/jpeg')).width,32);
+ assert.equal(createHash('sha256').update(small).digest('hex'),before);
 });
 test('classification distinguishes language-neutral Global from missing language',()=>{
  assert.equal(assetMetadata(metadata).language_kind,'global');

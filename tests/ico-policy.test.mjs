@@ -19,11 +19,11 @@ test('multi-resolution ICO preserves raw DIB and larger PNG frames',async()=>{
  const dib=Buffer.alloc(40+16*16*4+16*4);dib.writeUInt32LE(40,0);dib.writeInt32LE(16,4);dib.writeInt32LE(32,8);dib.writeUInt16LE(1,12);dib.writeUInt16LE(32,14);
  const large=await sharp(png).resize(512,512).png().toBuffer();
  const file=container([{width:16,height:16,bytes:dib},{width:256,height:256,bytes:png},{width:512,height:512,bytes:large}]);
- assert.equal((await validateAsset(file,'client_icon',mime)).frame_count,3);
+ const result=await validateAsset(file,'client_icon',mime);assert.equal(result.frame_count,3);assert.equal(result.width,512);assert.equal(result.height,512);
 });
-test('ICO rejects missing required size, malformed/truncated/overlapping entries and cursors',async()=>{
+test('ICO accepts small originals and rejects malformed/truncated/overlapping entries and cursors',async()=>{
  const small=await sharp(png).resize(32,32).png().toBuffer();
- await assert.rejects(()=>validateAsset(container([{width:32,height:32,bytes:small}]),'client_icon',mime),/invalid_asset_dimensions/);
+ assert.equal((await validateAsset(container([{width:32,height:32,bytes:small}]),'client_icon',mime)).width,32);
  const badOffset=Buffer.from(ico);badOffset.writeUInt32LE(1,18);
  const cursor=Buffer.from(ico);cursor.writeUInt16LE(2,2);
  const overlap=container([{width:256,height:256,bytes:png},{width:256,height:256,bytes:png}]);overlap.writeUInt32LE(overlap.readUInt32LE(18),34);

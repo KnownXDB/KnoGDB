@@ -67,12 +67,10 @@ export function createAssetWorkspace({api,action}){
         item.preview=URL.createObjectURL(new Blob([file],{type:item.mime}));
         try{
           if(item.mime===icoMime){
-            const bytes=await file.arrayBuffer(),view=new DataView(bytes);let compatible=false;
+            const bytes=await file.arrayBuffer(),view=new DataView(bytes);
             if(bytes.byteLength<22||view.getUint16(0,true)!==0||view.getUint16(2,true)!==1)throw Error('Invalid ICO container.');
             const count=view.getUint16(4,true);if(count<1||count>64||6+count*16>bytes.byteLength)throw Error('Invalid ICO directory.');
-            for(let index=0;index<count;index++){const entry=6+index*16;if((view.getUint8(entry)||256)===256&&(view.getUint8(entry+1)||256)===256)compatible=true;}
-            if(!compatible)throw Error('Client Icon ICO must contain a 256 × 256 image.');
-            item.width=256;item.height=256;item.role='client_icon';
+            item.role='client_icon';
           }else{const bitmap=await createImageBitmap(file);item.width=bitmap.width;item.height=bitmap.height;bitmap.close();
           item.role=Object.keys(dimensions).find(role=>dimensions[role][0]===item.width&&dimensions[role][1]===item.height)??(file.name.toLowerCase().includes('logo')?'logo':'');
           }
@@ -88,7 +86,6 @@ export function createAssetWorkspace({api,action}){
       if(!['image/png','image/jpeg',icoMime].includes(item.mime)||!item.file.size||item.file.size>16*1024*1024)throw Error('Choose PNG, JPEG or ICO up to 16 MiB.');
       if(!item.role)throw Error('Choose a role for this file.');
       if(item.mime===icoMime&&item.role!=='client_icon')throw Error('ICO files are supported for Client Icon.');
-      const expected=dimensions[item.role];if(expected&&(item.width!==expected[0]||item.height!==expected[1]))throw Error(`${roleNames[item.role]} requires ${expected[0]} × ${expected[1]} pixels.`);
       if(item.kind==='localized'&&!item.tags.length)throw Error('Choose a language or Global for this file.');
       item.status='uploading';renderQueue();
       if(!item.stored){
