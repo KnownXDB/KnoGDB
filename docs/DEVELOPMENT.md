@@ -140,7 +140,7 @@ including failed/expired ones, to avoid hiding orphaned storage. The daily cap i
 60 intents per administrator. Reconciliation, public transfer quotas, retention,
 MFA and monitored cost ceilings remain production gates.
 
-Validation: 27 unit/security tests passed. Rollback-only database checks verified
+Validation: 28 unit/security tests passed. Rollback-only database checks verified
 private intake, rights requirements, future validity, approval, withdrawal,
 duplicates, auditing and revoked admin access; no synthetic assets were retained.
 Playwright/local Chrome checked 1280px desktop and 390px mobile, file selection,
@@ -167,3 +167,15 @@ leaked-password protection; the provider documents it as Pro-and-above functiona
 No paid upgrade was enabled. See https://supabase.com/docs/guides/auth/password-security
 for that plan constraint. This does not remove the pending MFA/recovery production
 gates and is not reported as a zero-warning security audit.
+
+Final hosted check (2026-10-12, source commit e76290c):
+https://6acd44a8c04ecac28e92871c--knowngdb.netlify.app/admin/.
+The existing title API returns AION 2 (200). Its asset listing returns 200 with an
+empty array, an unavailable asset file returns 404, and private asset listing
+without an admin session returns 401. The Worker reports signed intake/delivery;
+a file request without a capability returns 403. These checks establish routing,
+configuration and access rejection, not a completed real-file ingestion.
+Final suite: 28 tests and exact-source repository-policy CI passed. No actual
+private signing value was printed or stored in Git; directory/history secret scans
+reported no findings. The maintainer must perform the first real upload/review and
+verify the downloaded checksum. No production promotion or release tag was made.
