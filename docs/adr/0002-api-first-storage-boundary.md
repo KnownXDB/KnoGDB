@@ -6,7 +6,7 @@
 
 ## Decisión
 
-Todo cliente externo accede a KnoxDB por API bajo /api/v1. No hay acceso directo
+Todo cliente externo accede a KnoGDB por API bajo /api/v1. No hay acceso directo
 a base de datos ni bucket. El backend aplica autorización, políticas de consumo,
 selección contextual, checksums y caché.
 
