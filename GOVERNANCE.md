@@ -1,7 +1,7 @@
 # Gobernanza
 
 Autor y mantenedor inicial: Mauricio Vuljevas (@mvuljevas).
-Repositorio canónico: https://github.com/KnownXDB/KnoGDB.
+Repositorio canónico: https://github.com/KnownXDB/KnownGDB.
 No existe todavía un dominio oficial ni servicio público anunciado.
 
 Código y documentación original: MIT según LICENSE. Las contribuciones
