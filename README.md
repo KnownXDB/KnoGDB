@@ -38,6 +38,8 @@ Spanish; reviewed English and Spanish documentation is planned before publicatio
 - [Versioning](VERSIONING.md)
 - [Security](SECURITY.md)
 - [Governance](GOVERNANCE.md)
+- [Project organization](docs/PROJECT-ORGANIZATION.md)
+- [Planning board](https://github.com/orgs/KnownXDB/projects/1)
 - [Publication checklist](docs/PUBLICATION-CHECKLIST.md)
 
 ## Technical direction
