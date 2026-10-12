@@ -20,6 +20,9 @@ revisión manual documentada, sin simular aprobación independiente. Incorporar
 revisión independiente obligatoria cuando exista un segundo mantenedor.
 
 CODEOWNERS solicita revisión; solo las protecciones remotas la hacen obligatoria.
+Mientras haya un único mantenedor con escritura, las ramas exigen PR y CI pero
+no una aprobación independiente. Revisar manualmente contribuciones externas.
+Activar aprobación obligatoria y CODEOWNERS al incorporar otro mantenedor.
 Otorgar escritura únicamente a mantenedores autorizados. Colaboradores externos
 contribuyen mediante forks y PRs. Trato respetuoso, sin acoso ni discriminación;
 el mantenedor puede cerrar contribuciones abusivas o retirar accesos.
