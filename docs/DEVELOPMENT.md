@@ -194,3 +194,22 @@ review, full-size previews and one-click batch decisions. Migration
 atomically audits every review. Uploads stay sequential and expose partial failures
 per row. Thumbnail requests use concurrency three. A note is optional and basic
 review has no date controls. The previous single-file/review editor was replaced.
+
+Stable development preview: https://development--knowngdb.netlify.app/admin/.
+Use this URL for ongoing validation instead of opening a new numbered deployment
+URL on every edit. This remains a draft with no production promotion. Deploy using:
+
+    npx netlify-cli deploy --alias development --draft --context deploy-preview
+
+The explicit --draft matters: --alias alone selects branch-deploy runtime context,
+even when --context deploy-preview selects preview build variables. The protected
+credentials exist only for Deploy Previews. Verified deployment 6acd513d38e17e30f4885c78
+has context deploy-preview and branch development. No credential scope was broadened.
+
+Batch QA: 29 tests and CI passed. Rollback database checks verified an atomic
+selection, per-asset audits, rights validation and no partial update for a missing
+asset. Playwright/local Chrome checked multi-file queueing, role suggestions,
+Global defaults, two valid uploads beside one incompatible file, single-request
+batch review, in-place large preview and readable controls at 1280px/390px.
+Authorized browser traffic was mocked; no synthetic public assets were retained.
+The user's existing real assets were not modified by the rollback tests.
