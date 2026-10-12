@@ -28,7 +28,7 @@ The development contract is docs/api/openapi.yaml. Rate limiting and hosted
 abuse protection are not implemented in this increment; do not expose it as
 a production service. No credentials or admin routes are served by the status page.
 
-Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY privately on the server. Do not
+Set SUPABASE_URL and SUPABASE_SECRET_KEY privately on the server. Do not
 paste them into tickets or source files. The example file has empty placeholders;
 the local launcher does not automatically load .env. Inject values through a
 private shell or environment manager without printing them. Never prefix the

@@ -4,7 +4,7 @@ import { createCatalogReader } from '../../src/infrastructure/catalog-reader.js'
 export default async function handler(request: Request): Promise<Response> {
   try {
     const origin = process.env.SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = process.env.SUPABASE_SECRET_KEY;
     const catalog = origin && serviceKey ? createCatalogReader(origin, serviceKey) : undefined;
     return createHandler(catalog)(request);
   } catch {
