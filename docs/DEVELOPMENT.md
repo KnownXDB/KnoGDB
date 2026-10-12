@@ -55,7 +55,25 @@ Do not expose Supabase tables directly to external clients.
 
 ## Outstanding deployment inputs
 
-Netlify account access, real project URL, server-side secret configuration and R2
-development bucket details remain required. Secret values are never requested in
+Netlify account access and server-side secret configuration remain required.
+The user confirmed the Supabase project URL and the real R2 bucket. Secret values are never requested in
 chat. Hosted authentication, cross-origin cookies and upload behavior require
 real validation; local unit tests do not establish these capabilities.
+
+## Confirmed storage and gateway
+
+The real bucket is knowngdb, Standard class. Public r2.dev access is disabled and
+no custom bucket domain is configured. Valid uploaded originals will be retained;
+never treat real validation files as disposable fixtures. The multipart lifecycle
+rule aborts incomplete uploads after seven days and does not delete completed files.
+
+workers/assets/wrangler.jsonc binds the private bucket to knowngdb-assets without
+publishing storage credentials. Its first deployment only exposes a health endpoint;
+all file reads and writes fail closed until authorization and publication checks
+are implemented. It must not be advertised as an operational asset delivery API.
+
+The first gateway is deployed at
+https://knowngdb-assets.mvuljevasdev.workers.dev/api/v1/health.
+On 2026-10-12 this returned 200 with uploads and delivery disabled; an arbitrary
+file path returned 403. Bucket existence and private access were verified separately
+with Wrangler. These checks do not establish an upload or catalog workflow.

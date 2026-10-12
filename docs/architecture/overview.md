@@ -38,9 +38,10 @@ clasificación efectiva y rendición original/derivada. ADR 0006 define el contr
 
 ## Alojamiento inicial
 
-Web, admin y API en servicios separados; base relacional junto al backend y
-object storage privado independiente. ADR 0005 registra proveedores y requisitos.
-No hay infraestructura provisionada ni dominio contratado. El panel de KnownGDB
+Netlify aloja web, admin y API; Supabase aloja PostgreSQL y autenticación;
+Cloudflare aloja R2 privado y el gateway de archivos. ADR 0007 sustituye ADR 0005.
+El bucket real knowngdb conserva assets de validación; no es almacenamiento
+descartable. No hay dominio contratado. El panel de KnownGDB
 administra planes y contenido; las consolas de infraestructura administran hosting.
 
 ## Administración y API
