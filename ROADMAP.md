@@ -1,7 +1,7 @@
 # Roadmap
 
 Estado: planificación. Las fases describen entregables futuros, no funcionalidad
-implementada. KnoxDB es autónomo y prioriza cobertura desktop.
+implementada. KnoGDB es autónomo y prioriza cobertura desktop.
 
 ## Fase 0 — Contratos y gobernanza
 
