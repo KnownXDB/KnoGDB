@@ -4,10 +4,11 @@
 
 No publicar secretos, datos personales ni vulnerabilidades explotables en issues,
 PRs, comentarios, wiki, discussions o foros. No adjuntar logs sin revisar.
-Usar Report a vulnerability en Security cuando esté habilitado. Si no está
+Usar Report a vulnerability en Security: el canal está habilitado en el repositorio
+canónico. Si no está
 disponible, contactar al mantenedor por un canal privado verificado; no publicar
-el hallazgo. No existe todavía un correo de seguridad declarado. Habilitar y
-probar un canal privado es obligatorio antes de abrir el repositorio.
+el hallazgo. No existe todavía un correo de seguridad declarado. No se ha enviado
+un reporte de prueba; verificar recepción antes de operar el servicio.
 
 ## Credenciales
 
