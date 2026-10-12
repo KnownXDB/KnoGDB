@@ -1,9 +1,9 @@
-# KnoGDB
+# KnownGDB
 
 **Known Games DataBase**, the desktop-first game catalog within
 [KnownXDB](https://github.com/KnownXDB).
 
-KnoGDB is an independent, API-first platform for canonical video game information,
+KnownGDB is an independent, API-first platform for canonical video game information,
 identity resolution and curated visual assets. Desktop titles are the initial
 priority; the domain supports multiple platforms, regions, languages and sources.
 
@@ -53,7 +53,7 @@ database or storage credentials.
 ## Authorship and license
 
 Author and initial maintainer: **Mauricio Vuljevas**.
-Canonical repository: [KnownXDB/KnoGDB](https://github.com/KnownXDB/KnoGDB).
+Canonical repository: [KnownXDB/KnownGDB](https://github.com/KnownXDB/KnownGDB).
 KnownXDB organizes independent knowledge database verticals; this repository
 focuses on the game catalog. Future vertical names and boundaries remain tentative.
 
