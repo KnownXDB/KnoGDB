@@ -55,7 +55,7 @@ Do not expose Supabase tables directly to external clients.
 
 ## Outstanding deployment inputs
 
-Netlify account access and server-side secret configuration remain required.
+Netlify account access is authorized; server-side secret configuration remains required.
 The user confirmed the Supabase project URL and the real R2 bucket. Secret values are never requested in
 chat. Hosted authentication, cross-origin cookies and upload behavior require
 real validation; local unit tests do not establish these capabilities.
@@ -77,3 +77,18 @@ https://knowngdb-assets.mvuljevasdev.workers.dev/api/v1/health.
 On 2026-10-12 this returned 200 with uploads and delivery disabled; an arbitrary
 file path returned 403. Bucket existence and private access were verified separately
 with Wrangler. These checks do not establish an upload or catalog workflow.
+
+## Verified hosted API preview
+
+The knowngdb Netlify project was created in the existing DevMe Free workspace.
+Local linkage is stored only in ignored .netlify files. GitHub auto-deploy has not
+been connected; this deployment was an explicit CLI preview, not production.
+
+Preview: https://6acd2fa71f968288f0afe804--knowngdb.netlify.app
+
+On 2026-10-12 the status page and /api/v1/health returned 200. /api/v1/games
+returned 503 catalog_not_configured because server credentials were absent.
+SUPABASE_URL is configured for preview functions only; it is not a credential.
+Add the server key privately before redeploying. Never use env:list or env:get to
+print secret values during verification. Do not add service-role credentials to
+build/public scopes or commit them to the repository.
