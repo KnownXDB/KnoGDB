@@ -67,7 +67,7 @@ export function createAdminHandler(gateway: AdminGateway, configuredOrigin?: str
         if (!assets) return json({error:'service_not_configured'},503);
         return json(await assets.admin(actor,'list',{game_id:url.searchParams.get('game_id')},url.origin));
       }
-      const assetAction=route.match(/^\/api\/v1\/admin\/assets\/(prepare|complete|review|preview)$/);
+      const assetAction=route.match(/^\/api\/v1\/admin\/assets\/(prepare|complete|review|review-batch|preview)$/);
       if (assetAction && request.method === 'POST') {
         if (!assets) return json({error:'service_not_configured'},503);
         return json(await assets.admin(actor,assetAction[1]!,await readBody(request),url.origin));

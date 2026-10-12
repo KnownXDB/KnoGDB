@@ -186,3 +186,11 @@ stored as JSON null; no rationale is fabricated. Actor, decision, timestamp and
 publication state remain audited, and distribution rights remain required for
 publication. Rollback checks verified approval/rejection without an explanation
 and withdrawal with an explanation, preserving the audit record.
+
+The current admin now uses a per-title asset workspace (ADR 0010): multi-file
+queue with common metadata/per-file role and language, simultaneous thumbnail
+review, full-size previews and one-click batch decisions. Migration
+20261012211532_batch_asset_review.sql scopes 1–100 distinct IDs to one title and
+atomically audits every review. Uploads stay sequential and expose partial failures
+per row. Thumbnail requests use concurrency three. A note is optional and basic
+review has no date controls. The previous single-file/review editor was replaced.

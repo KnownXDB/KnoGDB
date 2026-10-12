@@ -1,3 +1,4 @@
+import { createAssetWorkspace } from './assets.js';
 const loginPanel = document.querySelector('#login-panel');
 const catalogPanel = document.querySelector('#catalog-panel');
 const loginForm = document.querySelector('#login-form');
@@ -34,7 +35,7 @@ async function api(path, body) {
   }
   return data;
 }
-function showLogin() { loginPanel.hidden = false; catalogPanel.hidden = true; document.querySelector('#assets-panel').hidden = true; selected = null; pendingUpload=null; document.querySelector('#retry-asset').hidden=true; clearPreview(); }
+function showLogin() { loginPanel.hidden = false; catalogPanel.hidden = true; document.querySelector('#assets-panel').hidden = true; selected = null; assetWorkspace.clear(); }
 function resetEditor() {
   selected = null; gameForm.reset();
   document.querySelector('#editor-heading').textContent = 'New title';
@@ -65,7 +66,10 @@ async function load() {
   const picker=document.querySelector('#asset-game');const previous=picker.value;
   picker.replaceChildren(new Option('Choose a title',''));
   for(const game of data){const name=game.localizations.find(l=>l.is_primary)?.title ?? game.id;picker.add(new Option(name,game.id));}
-  if([...picker.options].some(option=>option.value===previous))picker.value=previous;
+  if(previous&&[...picker.options].some(option=>option.value===previous))picker.value=previous;
+  else if(data.length===1)picker.value=data[0].id;
+  assetWorkspace.setGames(data);
+  await assetWorkspace.load();
 }
 async function action(work, feedback=message) {
   if (busy) return; busy = true; message.textContent = ''; feedback.textContent='';
@@ -75,7 +79,7 @@ async function action(work, feedback=message) {
     message.textContent=text;feedback.textContent=text;
     if(feedback!==message&&!document.querySelector('#assets-panel').hidden)feedback.scrollIntoView({block:'nearest'});
   }
-  finally { busy = false; for (const button of document.querySelectorAll('button')) button.disabled = false; }
+  finally { busy = false; for (const button of document.querySelectorAll('button')) button.disabled = false; assetWorkspace.syncSelection(); }
 }
 loginForm.addEventListener('submit', event => {
   event.preventDefault();
@@ -104,77 +108,6 @@ document.querySelector('#logout').addEventListener('click', () => void action(as
   try { await api('logout', {}); message.textContent = 'Signed out.'; }
   finally { showLogin(); resetEditor(); }
 }));
+const assetWorkspace=createAssetWorkspace({api,action});
 void action(async () => { await api('session'); await load(); });
 
-const assetForm=document.querySelector('#asset-form');
-const reviewForm=document.querySelector('#review-form');
-const gamePicker=document.querySelector('#asset-game');
-const assetMessage=document.querySelector('#asset-message');
-const reviewMessage=document.querySelector('#review-message');
-const icoMessage='ICO import is not available yet. Client icons currently require a 256 × 256 PNG or JPEG.';
-assetForm.elements.namedItem('file').addEventListener('change',()=>{
-  const file=assetForm.elements.namedItem('file').files[0];
-  assetMessage.textContent=file?.name.toLowerCase().endsWith('.ico')?icoMessage:'';
-});
-let reviewAsset=null;
-let previewObject=null;
-let pendingUpload=null;
-function clearPreview(){if(previewObject)URL.revokeObjectURL(previewObject);previewObject=null;const image=document.querySelector('#asset-preview');image.hidden=true;image.removeAttribute('src');reviewForm.hidden=true;reviewAsset=null;}
-async function loadAssets(){
-  clearPreview();const list=document.querySelector('#assets');list.replaceChildren();
-  if(!gamePicker.value)return;
-  const {data}=await api(`assets?game_id=${encodeURIComponent(gamePicker.value)}`);
-  if(!data.length){const item=document.createElement('li');item.textContent='No assets yet.';list.append(item);}
-  for(const asset of data){
-    const item=document.createElement('li'),button=document.createElement('button');button.type='button';
-    button.textContent=`${asset.role} · ${asset.language_kind==='global'?'Global':asset.language_tags.join(', ')} · ${asset.provenance} · ${asset.moderation_status} · ${asset.publication_status}`;
-    button.addEventListener('click',()=>void action(async()=>{
-      clearPreview();reviewAsset=asset;reviewForm.reset();
-      reviewForm.elements.namedItem('decision').value=['approved','rejected','withdrawn'].includes(asset.moderation_status)?asset.moderation_status:'approved';
-      reviewForm.elements.namedItem('publish').checked=asset.publication_status==='published';
-      reviewForm.elements.namedItem('rights_reference').value=asset.rights_reference ?? '';
-      document.querySelector('#asset-details').textContent=`${asset.width} × ${asset.height} · ${asset.mime_type} · ${(asset.byte_size/1024).toFixed(1)} KiB · ${asset.rendition} · ID: ${asset.id}`;
-      reviewForm.hidden=false;
-      const grant=await api('assets/preview',{id:asset.id,game_id:gamePicker.value});
-      const response=await fetch(grant.preview_url,{headers:{Authorization:`Bearer ${grant.preview_grant}`},credentials:'omit',referrerPolicy:'no-referrer'});
-      if(!response.ok)throw new Error('The private preview could not be loaded.');
-      previewObject=URL.createObjectURL(await response.blob());const image=document.querySelector('#asset-preview');image.src=previewObject;image.hidden=false;
-    },reviewMessage));item.append(button);list.append(item);
-  }
-}
-gamePicker.addEventListener('change',()=>void action(loadAssets,assetMessage));
-assetForm.elements.namedItem('language_kind').addEventListener('change',()=>{
-  const tags=assetForm.elements.namedItem('language_tags');const global=assetForm.elements.namedItem('language_kind').value==='global';
-  tags.disabled=global;tags.required=!global;if(global)tags.value='';
-});
-assetForm.elements.namedItem('language_tags').required=true;
-async function completeUpload(){
-  if(!pendingUpload)return;
-  await api('assets/complete',{id:pendingUpload});pendingUpload=null;document.querySelector('#retry-asset').hidden=true;
-  await loadAssets();assetForm.elements.namedItem('file').value='';assetMessage.textContent='Original uploaded and validated. It is private and awaiting review.';
-}
-assetForm.addEventListener('submit',event=>{event.preventDefault();void action(async()=>{
-  if(!gamePicker.value)throw new Error('Choose a title before uploading.');
-  const form=new FormData(assetForm),file=form.get('file');
-  if(file instanceof File&&file.name.toLowerCase().endsWith('.ico'))throw new Error(icoMessage);
-  if(!(file instanceof File)||!file.size||file.size>16*1024*1024||!['image/png','image/jpeg'].includes(file.type))throw new Error('Choose a PNG or JPEG file up to 16 MiB.');
-  const dimensions={header:[920,430],capsule:[600,900],hero:[3840,1240],icon:[32,32],client_icon:[256,256]};
-  const expected=dimensions[form.get('role')];
-  if(expected){const bitmap=await createImageBitmap(file);const matches=bitmap.width===expected[0]&&bitmap.height===expected[1];bitmap.close();if(!matches)throw new Error(errors.invalid_asset_dimensions);}
-  const bytes=await file.arrayBuffer();const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
-  const global=form.get('language_kind')==='global';
-  const prepared=await api('assets/prepare',{game_id:gamePicker.value,role:form.get('role'),mime_type:file.type,byte_size:file.size,checksum_sha256:hash,
-    language_kind:form.get('language_kind'),language_tags:global?[]:String(form.get('language_tags')).split(',').map(tag=>tag.trim()).filter(Boolean),
-    provenance:form.get('provenance'),source_reference:form.get('source_reference'),confidence:Number(form.get('confidence'))});
-  assetMessage.textContent='Uploading original…';
-  const response=await fetch(prepared.upload_url,{method:'PUT',headers:{Authorization:`Bearer ${prepared.upload_grant}`,'Content-Type':file.type},body:bytes,credentials:'omit',referrerPolicy:'no-referrer'});
-  if(!response.ok)throw new Error('The original upload failed. Check the connection and try again.');
-  pendingUpload=prepared.id;document.querySelector('#retry-asset').hidden=false;
-  assetMessage.textContent='Validating original…';await completeUpload();
-},assetMessage);});
-document.querySelector('#retry-asset').addEventListener('click',()=>void action(completeUpload,assetMessage));
-reviewForm.addEventListener('submit',event=>{event.preventDefault();void action(async()=>{
-  if(!reviewAsset)return;const form=new FormData(reviewForm);
-  await api('assets/review',{id:reviewAsset.id,decision:form.get('decision'),publish:form.has('publish'),rights_reference:form.get('rights_reference'),reason:form.get('reason'),valid_from:reviewAsset.valid_from??null,valid_until:reviewAsset.valid_until??null});
-  await loadAssets();assetMessage.textContent='Review saved. Public delivery also requires a published title.';
-},reviewMessage);});

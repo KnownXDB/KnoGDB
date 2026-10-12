@@ -71,11 +71,19 @@ export function createAssetService(projectUrl:string,secret:string,workerUrl:str
         return {preview_url:new URL('/api/v1/files',worker).href,
           preview_grant:fileGrant(asset,String(asset.object_key),'private')};
       }
-      if(route==='review') {
-        if(!uuid(body.id)||!['approved','rejected','withdrawn'].includes(String(body.decision))||
+      if(route==='review'||route==='review-batch') {
+        if(!['approved','rejected','withdrawn'].includes(String(body.decision))||
           typeof body.publish!=='boolean'||(body.reason!=null && (typeof body.reason!=='string'||body.reason.length>2000))||
           typeof body.rights_reference!=='string'||body.rights_reference.length>4000)throw new Error('invalid_request');
         if(body.publish&&(body.decision!=='approved'||!body.rights_reference.trim()))throw new Error('rights_required');
+        if(route==='review-batch') {
+          if(!uuid(body.game_id)||!Array.isArray(body.ids)||body.ids.length<1||body.ids.length>100||
+            !body.ids.every(uuid)||new Set(body.ids).size!==body.ids.length)throw new Error('invalid_request');
+          return {ids:await rpc('admin_asset_batch_review',actor,{p_game:body.game_id,p_assets:[...body.ids].sort(),
+            p_decision:body.decision,p_publish:body.publish,p_rights:body.rights_reference,
+            p_reason:typeof body.reason==='string'?body.reason.trim()||null:null})};
+        }
+        if(!uuid(body.id))throw new Error('invalid_request');
         return {id:await rpc('admin_asset_review',actor,{p_asset:body.id,p_decision:body.decision,p_publish:body.publish,
           p_rights:body.rights_reference,p_reason:typeof body.reason==='string'?body.reason.trim()||null:null,p_from:date(body.valid_from),p_until:date(body.valid_until)})};
       }

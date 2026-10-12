@@ -91,3 +91,17 @@ test('finalization decodes actual stored bytes before calling the asset registra
  assert.deepEqual(await service.admin({userId:game,sessionId:asset},'complete',{id:asset},origin),{id:asset});assert.equal(finalized,true);
  }finally{globalThis.fetch=original;}
 });
+
+test('batch review validates distinct IDs and delegates one atomic, scoped transaction',async()=>{
+ const original=globalThis.fetch;let calls=0;
+ globalThis.fetch=async(url,options)=>{calls++;assert.equal(new URL(url).pathname,'/rest/v1/rpc/admin_asset_batch_review');const body=JSON.parse(options.body);assert.equal(body.p_game,game);assert.deepEqual(body.p_assets,[game,asset]);assert.equal(body.p_reason,null);return Response.json([game,asset]);};
+ try{
+  const service=createAssetService('https://project.example','sb_secret_test_fixture_not_a_real_key','https://files.example',privateKey);
+  const actor={userId:game,sessionId:asset};const body={game_id:game,ids:[asset,game],decision:'approved',publish:true,rights_reference:'Fixture license'};
+  assert.deepEqual(await service.admin(actor,'review-batch',body,origin),{ids:[game,asset]});
+  await assert.rejects(()=>service.admin(actor,'review-batch',{...body,ids:[asset,asset]},origin),/invalid_request/);
+  await assert.rejects(()=>service.admin(actor,'review-batch',{...body,ids:[]},origin),/invalid_request/);
+  await assert.rejects(()=>service.admin(actor,'review-batch',{...body,rights_reference:''},origin),/rights_required/);
+  assert.equal(calls,1);
+ }finally{globalThis.fetch=original;}
+});
