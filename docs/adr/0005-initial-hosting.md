@@ -11,7 +11,7 @@ database connectivity. Store original assets and derivatives in private
 Cloudflare R2 buckets, accessed only by the backend through an S3-compatible API.
 
 These are actual infrastructure dependencies, not domain or feature names.
-Provider dashboards manage infrastructure. KnoGDB's administrative backend and
+Provider dashboards manage infrastructure. KnownGDB's administrative backend and
 panel manage catalog data, moderation, API credentials, plans and consumption.
 
 A custom domain is not required for local development or a test deployment using
