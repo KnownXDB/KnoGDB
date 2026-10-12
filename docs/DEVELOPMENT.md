@@ -1,16 +1,14 @@
 # Development and deployment status
 
-## Implemented first increment
+## Available preview
 
-- Typed HTTP handler with health and paginated published-catalog reads.
-- Database gateway adapter restricted to an approved publication view.
-- Global/localized asset classification and explicit language fallback rules.
-- Initial SQL migration with private tables, row-level security and provenance.
-- Serverless hosting configuration and a local API server.
+The development service provides public health and paginated published-title
+reads, plus individual administrator sign-in and audited title/localization writes.
+It is not the complete MVP. Asset uploads/delivery, MFA, genres, organizations,
+releases, API quotas, account recovery and tested backups remain pending.
 
-No administrative login, write endpoints, upload Worker or usable admin UI exists
-in this increment. The HTML page is a development status page, not the public
-product. Do not advertise this increment as the complete 4–5 title validation.
+Hosting is Netlify Functions/web, Supabase PostgreSQL/Auth and a private Cloudflare
+R2 bucket. No paid plan or automatic production deployment is enabled.
 
 ## Local checks
 
@@ -20,82 +18,89 @@ Use Node.js 22 or later:
     npm run verify
     npm run dev:api
 
-The API listens on loopback at port 8787. GET /api/v1/health works without secrets.
-GET /api/v1/games fails with 503 until storage is configured. It returns only
-published games with an approved primary localization. Pagination is bounded.
-All writes are rejected until authorized administrative routes are implemented.
-The development contract is docs/api/openapi.yaml. Rate limiting and hosted
-abuse protection are not implemented in this increment; do not expose it as
-a production service. No credentials or admin routes are served by the status page.
+The local launcher serves public API checks on loopback port 8787. The admin
+requires HTTPS hosting for its Secure cookie and is verified on an isolated preview.
+Set SUPABASE_URL and SUPABASE_SECRET_KEY privately on the server. Never expose
+these through browser variables, logs, process arguments, documentation or Git.
+The launcher does not automatically load .env. Example values remain empty.
 
-Set SUPABASE_URL and SUPABASE_SECRET_KEY privately on the server. Do not
-paste them into tickets or source files. The example file has empty placeholders;
-the local launcher does not automatically load .env. Inject values through a
-private shell or environment manager without printing them. Never prefix the
-service key as a browser-public variable.
+## Database and authorization
 
-## Database
+Applied migrations, matching the remote history:
 
-Migration 20261012194157_catalog_foundation.sql was applied through the Supabase
-connector on 2026-10-12 to the confirmed empty application schemas. Its local
-version matches remote migration history. Do not apply it again to that project.
-Three private tables and a security-invoker publication view were verified:
-anonymous and authenticated roles cannot read them; the backend role can.
-Rollback-only checks verified homonymous titles, draft exclusion and language
-constraints without retaining synthetic records. RLS without policies is intentional
-for these backend-only tables; the security advisor reports three informational
-notices, not a grant of public access.
-No production records or default administrator are seeded. Further increments
-will add organizations, genres, releases and audited admin transactions.
+- 20261012194157_catalog_foundation.sql: private games, localizations and assets.
+- 20261012195146_administrative_catalog.sql: private admin membership/allowlist,
+  persistent sign-in throttling and transactional, audited administration functions.
 
-## Netlify setup
+Anonymous and authenticated database roles cannot read the private tables or
+execute administrative functions. The backend verifies Auth tokens, active
+membership and a live session for every protected request. RLS without public
+policies deliberately denies direct clients. The security advisor reports seven
+informational notices under this backend-only model, with no warning/error finding.
+See the [RLS notice explanation](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
 
-Create an account, authorize access only to KnownXDB/KnownGDB and import the
-repository. netlify.toml declares build, publish and function paths. Deploy the
-approved development commit explicitly; do not wire arbitrary branch pushes to
-production. Use the Free plan; leave automatic recharge disabled.
+Rollback-only checks covered confirmed-account provisioning, private drafts,
+review-before-publication, stale edits, audit records, membership revocation and
+sign-in throttling. No synthetic accounts or titles were retained.
 
-Configure server-side secrets in the hosting dashboard. Check function routing
-and request/CPU limits against the hosted deployment before opening access.
-Do not expose Supabase tables directly to external clients.
+## First administrator
 
-## Outstanding deployment inputs
+The maintainer's chosen email is configured only in the private database allowlist.
+No account, password or default administrator is seeded in repository migrations.
+In the project's Supabase dashboard, open Authentication > Users > Add user >
+Create new user. Enter the privately agreed email and a strong personal password,
+and select email auto-confirm when offered. Do not paste the password in chat,
+source files, terminal arguments or tickets. The confirmed account automatically
+receives the allowlisted membership. Sign into the hosted /admin/ page using that
+Auth account; this is separate from a Supabase dashboard account.
 
-Netlify account access is authorized and server-side secret configuration is working.
-The user confirmed the Supabase project URL and the real R2 bucket. Secret values are never requested in
-chat. Hosted authentication, cross-origin cookies and upload behavior require
-real validation; local unit tests do not establish these capabilities.
+Actual credential sign-in by the maintainer remains unverified until the account
+exists. Password-based development access must not be promoted to production
+before MFA/AAL2 enforcement and recovery have been implemented and tested.
 
-## Confirmed storage and gateway
+## Netlify preview configuration
 
-The real bucket is knowngdb, Standard class. Public r2.dev access is disabled and
-no custom bucket domain is configured. Valid uploaded originals will be retained;
-never treat real validation files as disposable fixtures. The multipart lifecycle
-rule aborts incomplete uploads after seven days and does not delete completed files.
+Project knowngdb is in the existing DevMe Free workspace. Local linkage is ignored
+under .netlify. GitHub auto-deploy remains disconnected. Use explicit CLI previews
+with --context deploy-preview; do not promote automatically.
 
-workers/assets/wrangler.jsonc binds the private bucket to knowngdb-assets without
-publishing storage credentials. Its first deployment only exposes a health endpoint;
-all file reads and writes fail closed until authorization and publication checks
-are implemented. It must not be advertised as an operational asset delivery API.
+SUPABASE_URL is populated for Deploy Previews. SUPABASE_SECRET_KEY is marked secret
+and populated only for that context. Free plan scopes also expose it to trusted
+builds/runtime, so never run untrusted code using this credential. The secret is
+never sent to the browser, even though the administrative UI is publicly readable.
 
-The first gateway is deployed at
-https://knowngdb-assets.mvuljevasdev.workers.dev/api/v1/health.
-On 2026-10-12 this returned 200 with uploads and delivery disabled; an arbitrary
-file path returned 403. Bucket existence and private access were verified separately
-with Wrangler. These checks do not establish an upload or catalog workflow.
+Temporary admin route: /admin/. Future admin.<domain> will use ADMIN_ORIGIN and a
+same-origin admin API proxy, without changing database identity or stored file keys.
 
-## Verified hosted API preview
+## Storage gateway
 
-The knowngdb Netlify project was created in the existing DevMe Free workspace.
-Local linkage is stored only in ignored .netlify files. GitHub auto-deploy has not
-been connected; this deployment was an explicit CLI preview, not production.
+The knowngdb bucket uses Standard storage. Public r2.dev access is disabled. No
+custom bucket domain is configured. Valid originals will be retained. The only
+lifecycle rule aborts incomplete multipart uploads after seven days.
 
-Preview: https://6acd3601809d393ebadbf582--knowngdb.netlify.app
+The Worker at https://knowngdb-assets.mvuljevasdev.workers.dev/api/v1/health
+returns health with upload/delivery disabled. All file operations fail closed.
+No assets have been uploaded by this increment.
 
-After applying the migration on 2026-10-12, /api/v1/games returned 200 with an
-empty data array. The server secret was never printed or copied into the repo.
-SUPABASE_URL is not a credential. SUPABASE_SECRET_KEY is marked secret in Netlify
-and populated only for Deploy Previews. The Free plan also exposes it to trusted
-preview builds and runtime; Functions-only scoping is unavailable on this plan.
-GitHub auto-deploy remains disconnected. Do not run untrusted preview code with
-this credential. Never print secret values or include them in frontend bundles.
+## Validation evidence
+
+The unit/security suite covers payload bounds, language validation, secure cookie
+responses, server token verification, membership revocation, CSRF, throttling and
+sanitized errors. Database rollback tests additionally verify write transactions.
+Hosted public reads return an empty published catalog; admin requests without a
+session return 401 and mutations without the required origin return 403.
+
+Browser plugin not available: regular Playwright with local Chrome checked desktop
+1280px and mobile 390px. Page identity, nonblank content, responsive width, password
+clearing, title creation, localized editing preserving UUID and sign-out passed.
+Authorized UI interactions used mocked API responses; they do not establish real
+password sign-in or a retained end-to-end write. No page runtime errors occurred.
+Expected 401 requests at anonymous startup are not JavaScript runtime errors.
+Screenshots and the temporary QA script are outside Git.
+
+## Current hosted preview
+
+Preview URL and validation date are recorded in the pull request. The public API
+and admin UI are deployed explicitly from the reviewed work branch; production
+has not been promoted. Auth account creation is the remaining maintainer action
+for real administrator sign-in validation.

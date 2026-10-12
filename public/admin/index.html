@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>KnownGDB — Administration</title>
+  <link rel="stylesheet" href="/admin/style.css">
+  <script src="/admin/admin.js" defer></script>
+</head>
+<body>
+<main>
+  <header><p class="eyebrow">KNOWNGDB · DEVELOPMENT</p><h1>Catalog administration</h1><p>Manage canonical titles and their localized information.</p></header>
+  <p id="message" role="status" aria-live="polite"></p>
+  <section id="login-panel">
+    <h2>Administrator sign in</h2>
+    <form id="login-form">
+      <label>Email<input name="email" type="email" autocomplete="username" required maxlength="254"></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required maxlength="1024"></label>
+      <button type="submit">Sign in</button>
+    </form>
+    <p class="hint">Access requires an approved administrator account. Sessions last up to 15 minutes.</p>
+  </section>
+  <section id="catalog-panel" hidden>
+    <div class="toolbar"><h2>Titles</h2><button id="logout" type="button">Sign out</button></div>
+    <p class="hint">Showing the latest 100 titles. Choose a language to edit an existing translation. New translations keep the same title ID.</p>
+    <div class="workspace">
+      <aside><button id="new-game" type="button">New title</button><ul id="games"></ul></aside>
+      <form id="game-form">
+        <h3 id="editor-heading">New title</h3>
+        <p id="game-id" class="hint"></p>
+        <label>Language<input name="language" value="en" required maxlength="35" placeholder="en, es, es-419"></label>
+        <label>Localized title<input name="title" required maxlength="300"></label>
+        <label>Description<textarea name="description" rows="5" maxlength="20000"></textarea></label>
+        <label>Source reference<input name="source_reference" required maxlength="2000" placeholder="Official source URL or reference"></label>
+        <label>Confidence (0–1)<input name="confidence" type="number" min="0" max="1" step="0.001" value="1" required></label>
+        <label>Publication status<select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="withdrawn">Withdrawn</option></select></label>
+        <label class="check"><input name="is_primary" type="checkbox" checked>Primary language for this title</label>
+        <label class="check"><input name="approved" type="checkbox">I reviewed this translation and its source</label>
+        <p class="hint">Publishing requires an approved primary translation. Save other languages under the existing ID.</p>
+        <button type="submit">Save title</button>
+      </form>
+    </div>
+  </section>
+  <footer><a href="/">KnownGDB</a> · Development preview. Asset uploads are the next milestone.</footer>
+</main>
+</body>
+</html>

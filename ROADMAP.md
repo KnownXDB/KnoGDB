@@ -1,7 +1,9 @@
 # Roadmap
 
-Estado: planificación. Las fases describen entregables futuros, no funcionalidad
-implementada. KnownGDB es autónomo y prioriza cobertura desktop.
+Estado: desarrollo inicial. Hay una vista previa de API pública y administración
+de títulos localizados; no constituye el MVP completo. Las fases siguientes
+incluyen trabajo pendiente. Consultar docs/DEVELOPMENT.md para evidencia y límites.
+KnownGDB es autónomo y prioriza cobertura desktop.
 
 ## Fase 0 — Contratos y gobernanza
 

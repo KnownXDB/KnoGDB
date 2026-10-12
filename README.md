@@ -9,9 +9,10 @@ priority; the domain supports multiple platforms, regions, languages and sources
 
 ## Status
 
-The first executable API foundation is available in development. No hosted
-deployment or official domain has been validated. Administrative capabilities
-remain planned requirements. See [development status](docs/DEVELOPMENT.md).
+A hosted development preview provides published-title API reads and individual
+admin sign-in with audited title/localization editing. No official domain or
+production release is available. Asset uploads and MFA remain pending.
+See [development status](docs/DEVELOPMENT.md).
 
 ## Product scope
 

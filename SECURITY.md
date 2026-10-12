@@ -50,6 +50,8 @@ automatically.
 
 ## Supported versions and implementation status
 
-KnownGDB is currently a documentation and planning project, with no deployed service
-or supported production release. The administrative controls described here are
-implementation requirements, not verified service capabilities.
+KnownGDB has a development preview with individual Auth accounts, private admin
+membership, live session checks, secure cookies, CSRF checks and audited catalog
+writes. No production release is supported. MFA/AAL2 enforcement, account recovery,
+public API quotas and disaster recovery are required before production use.
+The preview does not provide asset uploads or the complete administrative MVP.

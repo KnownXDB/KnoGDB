@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: KnownGDB Development API
   version: 0.1.0-alpha.1
-  description: First read-only increment. Administrative and asset endpoints are not implemented.
+  description: Development catalog and private title administration. Asset operations remain pending.
 servers:
   - url: /api/v1
 paths:
@@ -50,3 +50,94 @@ paths:
                       offset: { type: integer }
         '400': { description: Invalid pagination. }
         '503': { description: Catalog is not configured or is unavailable. }
+  /admin/login:
+    post:
+      operationId: adminLogin
+      description: Exact Origin and X-KnownGDB-Action admin header required. Credentials stay server-side.
+      parameters:
+        - { name: X-KnownGDB-Action, in: header, required: true, schema: { type: string, const: admin } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, maxLength: 254 }
+                password: { type: string, minLength: 1, maxLength: 1024, writeOnly: true }
+      responses:
+        '200': { description: Verified administrator; Secure HttpOnly session cookie, maximum 15 minutes. }
+        '400': { description: Invalid request. }
+        '401': { description: Invalid credentials or account not authorized. }
+        '403': { description: Origin verification failed. }
+        '429': { description: Sign-in attempt cap reached. }
+        '503': { description: Service unavailable. }
+  /admin/session:
+    get:
+      operationId: adminSession
+      security: [{ adminCookie: [] }]
+      responses:
+        '200': { description: Live Auth session and active administrator membership. }
+        '401': { description: Missing, expired or revoked session. }
+        '403': { description: Membership denied. }
+        '503': { description: Service unavailable. }
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      security: [{ adminCookie: [] }]
+      description: Requires exact Origin and action header. Revokes current session and clears cookie.
+      parameters:
+        - { name: X-KnownGDB-Action, in: header, required: true, schema: { type: string, const: admin } }
+      responses:
+        '200': { description: Signed out. }
+        '401': { description: No session. }
+        '403': { description: Origin verification failed. }
+        '503': { description: Cookie cleared but remote revocation could not be confirmed. }
+  /admin/games:
+    get:
+      operationId: adminListGames
+      security: [{ adminCookie: [] }]
+      responses:
+        '200': { description: Latest 100 games with all localizations, including private drafts. }
+        '401': { description: No valid session. }
+        '403': { description: Membership denied. }
+        '503': { description: Service unavailable. }
+    post:
+      operationId: adminSaveGame
+      security: [{ adminCookie: [] }]
+      description: Atomic localization upsert and audited game status update. Exact Origin required.
+      parameters:
+        - { name: X-KnownGDB-Action, in: header, required: true, schema: { type: string, const: admin } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [language, title, description, source_reference, confidence, status, is_primary, approved]
+              properties:
+                id: { type: [string, 'null'], format: uuid, description: Omit for new title; reuse for translations. }
+                expected_updated_at: { type: [string, 'null'], format: date-time, description: Required to update existing titles. }
+                language: { type: string, description: Canonical language tag; und and Global are not title languages. }
+                title: { type: string, minLength: 1, maxLength: 300 }
+                description: { type: [string, 'null'], maxLength: 20000 }
+                source_reference: { type: string, minLength: 1, maxLength: 2000 }
+                confidence: { type: number, minimum: 0, maximum: 1 }
+                status: { type: string, enum: [draft, published, withdrawn] }
+                is_primary: { type: boolean }
+                approved: { type: boolean }
+      responses:
+        '200': { description: Saved canonical UUID. }
+        '400': { description: Invalid input or publication requires reviewed primary translation. }
+        '401': { description: No valid session. }
+        '403': { description: Membership or origin denied. }
+        '404': { description: Existing game not found. }
+        '409': { description: Stale edit; reload before saving. }
+        '503': { description: Service unavailable. }
+components:
+  securitySchemes:
+    adminCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-knowngdb-session
