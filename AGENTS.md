@@ -2,7 +2,7 @@
 
 ## Alcance
 
-KnoxDB es un servicio autónomo de catálogo canónico, identidad y assets de
+KnoGDB es un servicio autónomo de catálogo canónico, identidad y assets de
 videojuegos. Ningún consumidor externo determina el modelo del dominio.
 
 ## Reglas obligatorias
