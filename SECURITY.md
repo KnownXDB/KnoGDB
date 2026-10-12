@@ -1,50 +1,55 @@
-# Seguridad
+# Security Policy
 
-## Reportes privados
+## Private vulnerability reports
 
-No publicar secretos, datos personales ni vulnerabilidades explotables en issues,
-PRs, comentarios, wiki, discussions o foros. No adjuntar logs sin revisar.
-Usar Report a vulnerability en Security: el canal está habilitado en el repositorio
-canónico. Si no está
-disponible, contactar al mantenedor por un canal privado verificado; no publicar
-el hallazgo. No existe todavía un correo de seguridad declarado. No se ha enviado
-un reporte de prueba; verificar recepción antes de operar el servicio.
+Do not publish secrets, personal data or exploitable vulnerability details in
+issues, pull requests, comments, wikis, discussions or forums. Review logs before
+sharing them.
 
-## Credenciales
+Use **Report a vulnerability** in the canonical repository's Security tab:
+https://github.com/KnownXDB/KnoGDB/security/advisories/new.
+Private reporting is enabled. If it is unavailable, contact the maintainer through
+a verified private channel; do not disclose the finding publicly. No security
+email address has been designated. Report delivery has not been tested and must
+be verified before operating the service.
 
-- No crear una contraseña administrativa global ni credenciales predeterminadas.
-- Implementar accesos individuales, MFA, permisos por rol y sesiones revocables.
-- Separar claves de consumo de API y permisos administrativos.
-- Mantener secretos en el gestor privado del entorno, con permisos mínimos y
-  separación de desarrollo, staging y producción.
-- Nunca incrustar secretos en fuentes, comentarios, fixtures, documentación,
-  imágenes, bundles, source maps o variables públicas del frontend.
-- No incluir secretos en URLs, argumentos de procesos, logs, respuestas API,
-  errores, informes o artefactos CI. Redactar antes de registrar.
-- Mostrar claves API solo al emitirlas y almacenar únicamente hashes adecuados
-  y metadata. No ofrecer recuperación del valor original.
-- Proteger sesiones web con cookies Secure, HttpOnly, SameSite, expiración y
-  defensa CSRF. El navegador no recibe credenciales de infraestructura ni una
-  clave administrativa compartida.
-- Ejemplos de configuración solo contienen valores vacíos o placeholders.
+## Credentials and administrative access
 
-## Prevención y respuesta
+- Do not create shared administrative passwords or default credentials.
+- Implement individual accounts, MFA, role-based permissions and revocable sessions.
+- Keep API consumption keys separate from administrative permissions.
+- Store secrets in the environment's private secret manager, with least privilege
+  and separate development, staging and production environments.
+- Never embed secrets in source code, comments, fixtures, documentation, images,
+  bundles, source maps or public frontend variables.
+- Do not include secrets in URLs, process arguments, logs, API responses, errors,
+  reports or CI artifacts. Redact sensitive values before logging.
+- Show API keys only when issued. Store appropriate hashes and identifying metadata;
+  do not provide a way to retrieve the original value.
+- Protect web sessions with Secure, HttpOnly and SameSite cookies, expiration and
+  CSRF protection. Never send infrastructure credentials or a shared administrative
+  key to the browser.
+- Configuration examples must contain only empty values or clear placeholders.
 
-.gitignore no protege archivos ya versionados ni impide git add --force.
-CI y escáneres no garantizan detectar todos los secretos. Antes de publicar,
-revisar historial completo, ramas, tags y superficies públicas con un escáner
-especializado y revisión manual; activar protección de pushes cuando esté disponible.
+## Prevention and incident response
 
-Ante exposición: revocar o rotar primero, investigar alcance y luego limpiar
-historial y copias según corresponda. Borrar un archivo no revoca una clave.
-No reproducir secretos en tickets de incidentes.
+.gitignore does not protect tracked files or prevent git add --force.
+CI and scanners cannot guarantee detection of every secret. Before publishing,
+review the complete history, branches, tags and public surfaces using a dedicated
+scanner and manual review. Enable push protection where available.
 
-PRs externos ejecutan sin secretos de producción, sin runners propios y con
-permisos mínimos. No ejecutar código no confiable con pull_request_target y
-credenciales. Fijar actions por SHA revisado. Despliegues futuros requieren
-entornos protegidos y aprobación; no promover automáticamente.
+If a credential is exposed, revoke or rotate it first, investigate the scope, then
+clean history and copies as appropriate. Deleting a file does not revoke a key.
+Do not reproduce secrets in incident tickets.
 
-## Estado
+External pull requests run without production secrets, without self-hosted runners
+and with minimal permissions. Do not execute untrusted code using
+pull_request_target with credentials. Pin actions to reviewed commit SHAs.
+Future deployments require protected environments and approval; do not promote
+automatically.
 
-Proyecto documental, sin servicio desplegado. Los controles administrativos
-descritos son requisitos de implementación, no capacidades ya verificadas.
+## Supported versions and implementation status
+
+KnoGDB is currently a documentation and planning project, with no deployed service
+or supported production release. The administrative controls described here are
+implementation requirements, not verified service capabilities.
