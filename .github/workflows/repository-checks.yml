@@ -17,3 +17,7 @@ jobs:
         run: node scripts/verify-repository.mjs
       - name: Verify whitespace
         run: git diff --check
+      - name: Install development tooling
+        run: npm ci --ignore-scripts
+      - name: Verify API foundation
+        run: npm run verify

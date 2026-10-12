@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: KnownGDB Development API
+  version: 0.1.0-alpha.1
+  description: First read-only increment. Administrative and asset endpoints are not implemented.
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      responses:
+        '200':
+          description: Handler is available; does not establish database readiness.
+  /games:
+    get:
+      operationId: listPublishedGames
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+      responses:
+        '200':
+          description: Published games with approved primary localizations.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    maxItems: 100
+                    items:
+                      type: object
+                      required: [id, title, language, description]
+                      properties:
+                        id: { type: string, format: uuid }
+                        title: { type: string }
+                        language: { type: string }
+                        description: { type: [string, 'null'] }
+                  pagination:
+                    type: object
+                    required: [limit, offset]
+                    properties:
+                      limit: { type: integer }
+                      offset: { type: integer }
+        '400': { description: Invalid pagination. }
+        '503': { description: Catalog is not configured or is unavailable. }

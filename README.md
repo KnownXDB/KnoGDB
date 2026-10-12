@@ -9,9 +9,9 @@ priority; the domain supports multiple platforms, regions, languages and sources
 
 ## Status
 
-The project is in architectural planning. There is no runnable service, public
-deployment or official domain yet. Administrative capabilities described in the
-documentation are planned requirements.
+The first executable API foundation is available in development. No hosted
+deployment or official domain has been validated. Administrative capabilities
+remain planned requirements. See [development status](docs/DEVELOPMENT.md).
 
 ## Product scope
 
@@ -34,6 +34,7 @@ Spanish; reviewed English and Spanish documentation is planned before publicatio
 - [Next step](docs/NEXT-STEP.md)
 - [Architecture decisions](docs/adr/)
 - [Initial hosting](docs/adr/0005-initial-hosting.md)
+- [Current hosting and domain decision](docs/adr/0007-serverless-application-hosting.md)
 - [Asset languages and originals](docs/adr/0006-asset-language-classification.md)
 - [Contributing](CONTRIBUTING.md)
 - [Agent instructions](AGENTS.md)

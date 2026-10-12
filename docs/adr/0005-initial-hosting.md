@@ -1,6 +1,6 @@
 # ADR 0005: Initial hosting
 
-- Status: accepted architectural direction; not provisioned
+- Status: superseded by ADR 0007; never provisioned
 - Date: 2026-10-12
 
 ## Decision
