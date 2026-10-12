@@ -1,5 +1,6 @@
 import { parseGameInput } from '../domain/game-input.js';
 import { bucketHash, type AdminGateway } from '../infrastructure/admin-gateway.js';
+import type { AssetService } from '../infrastructure/asset-service.js';
 
 const cookieName = '__Host-knowngdb-session';
 function json(data: unknown, status=200, cookie?: string): Response {
@@ -29,7 +30,7 @@ async function readBody(request: Request): Promise<Record<string,unknown>> {
   catch { throw new Error('invalid_request'); }
 }
 
-export function createAdminHandler(gateway: AdminGateway, configuredOrigin?: string) {
+export function createAdminHandler(gateway: AdminGateway, configuredOrigin?: string, assets?: AssetService) {
   return async (request: Request, clientIp='unavailable'): Promise<Response> => {
     const url = new URL(request.url);
     if (request.method !== 'GET' && request.method !== 'POST') return json({error:'method_not_allowed'},405);
@@ -62,6 +63,15 @@ export function createAdminHandler(gateway: AdminGateway, configuredOrigin?: str
       }
       const actor = await gateway.identity(token);
       if (!await gateway.allowed(actor)) return json({error:'admin_forbidden'},403);
+      if (route === '/api/v1/admin/assets' && request.method === 'GET') {
+        if (!assets) return json({error:'service_not_configured'},503);
+        return json(await assets.admin(actor,'list',{game_id:url.searchParams.get('game_id')},url.origin));
+      }
+      const assetAction=route.match(/^\/api\/v1\/admin\/assets\/(prepare|complete|review|preview)$/);
+      if (assetAction && request.method === 'POST') {
+        if (!assets) return json({error:'service_not_configured'},503);
+        return json(await assets.admin(actor,assetAction[1]!,await readBody(request),url.origin));
+      }
       if (route === '/api/v1/admin/session' && request.method === 'GET') return json({authenticated:true});
       if (route === '/api/v1/admin/games' && request.method === 'GET') return json({data:await gateway.list(actor)});
       if (route === '/api/v1/admin/games' && request.method === 'POST') {
@@ -78,6 +88,8 @@ export function createAdminHandler(gateway: AdminGateway, configuredOrigin?: str
       const code=error instanceof Error ? error.message : '';
       const statuses: Record<string,number> = {unauthorized:401,admin_forbidden:403,invalid_request:400,rate_limited:429,
         edit_conflict:409,publication_requires_review:400,game_not_found:404};
+      Object.assign(statuses,{invalid_asset:400,invalid_asset_dimensions:400,invalid_logo:400,
+        duplicate_asset:409,rights_required:400,upload_not_found:404,asset_not_found:404,storage_budget_reached:429});
       return json({error:code in statuses ? code : 'service_unavailable'},statuses[code] ?? 503);
     }
   };

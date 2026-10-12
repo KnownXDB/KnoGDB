@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: KnownGDB Development Asset API
+  version: 0.1.0-alpha.2
+  description: Private original intake, administrator review and eligible public delivery. Hosted signing setup must be verified before use.
+servers:
+  - url: /api/v1
+paths:
+  /games/{game_id}/assets:
+    get:
+      operationId: listPublishedAssets
+      parameters:
+        - { name: game_id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: language, in: query, schema: { type: string }, description: Exact language then Global; global requests only language-neutral originals. Omit to list classifications without guessing. }
+        - { name: role, in: query, schema: { type: string, enum: [header, capsule, hero, logo, icon, client_icon] } }
+        - { name: official_only, in: query, schema: { type: boolean, default: false } }
+      responses:
+        '200': { description: Up to 100 approved, published originals with rights and active validity, grouped by exact/Global tier and official provenance. Includes stable file_url, UUID, MIME, dimensions, byte size and SHA-256. }
+        '400': { description: Invalid UUID or filter. }
+        '503': { description: Not configured or unavailable. }
+  /assets/{asset_id}/file:
+    get:
+      operationId: downloadOriginalAsset
+      parameters:
+        - { name: asset_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '302':
+          description: Eligible original; follow object-scoped delivery link valid for 60 seconds. Original bytes are unchanged.
+          headers:
+            Location: { schema: { type: string, format: uri } }
+        '404': { description: Asset absent or not eligible for public delivery. }
+        '503': { description: Not configured or unavailable. }
+  /admin/assets:
+    get:
+      operationId: listAdministrativeAssets
+      security: [{ adminCookie: [] }]
+      parameters:
+        - { name: game_id, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Up to 100 private/public assets with review metadata for this game. }
+        '401': { description: Missing valid session. }
+        '403': { description: Membership denied. }
+        '503': { description: Not configured or unavailable. }
+  /admin/assets/prepare:
+    post:
+      operationId: prepareOriginalUpload
+      security: [{ adminCookie: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/action' }
+      description: Exact Origin required. Reserves immutable UUID key; 1 GiB conservative intake budget and 60 intents per admin/day. Grant uses Authorization on Worker PUT, never a query parameter.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Upload' }
+      responses:
+        '200': { description: id, upload_url, upload_grant and expires_in=300. PUT original bytes with Authorization Bearer grant and declared Content-Type, then finalize. }
+        '400': { description: Invalid metadata. }
+        '401': { description: Missing valid session. }
+        '403': { description: Membership/origin denied. }
+        '409': { description: Exact duplicate already registered. }
+        '429': { description: Intake reservation or daily limit reached. }
+        '503': { description: Not configured or unavailable. }
+  /admin/assets/complete:
+    post:
+      operationId: completeOriginalUpload
+      security: [{ adminCookie: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/action' }
+      description: Exact Origin required. Server fetches private bytes, verifies checksum, decodes image and applies role policy before audited in_review registration. Same completed ID is idempotent; pending intent expires after 15 minutes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssetId' }
+      responses:
+        '200': { description: Registered asset UUID; remains private. }
+        '400': { description: Invalid format, dimensions, logo, checksum or payload. }
+        '401': { description: Missing valid session. }
+        '403': { description: Membership/origin denied. }
+        '404': { description: Upload missing, expired or belongs to another actor. }
+        '409': { description: Exact duplicate. }
+        '503': { description: Not configured or unavailable. }
+  /admin/assets/preview:
+    post:
+      operationId: previewPrivateOriginal
+      security: [{ adminCookie: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/action' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, game_id]
+              properties:
+                id: { type: string, format: uuid }
+                game_id: { type: string, format: uuid }
+      responses:
+        '200': { description: preview_url and preview_grant. GET requires Authorization header; preview grant is not accepted in URL. }
+        '401': { description: Missing valid session. }
+        '403': { description: Membership/origin denied. }
+        '404': { description: Asset absent from this title. }
+        '503': { description: Not configured or unavailable. }
+  /admin/assets/review:
+    post:
+      operationId: reviewOriginalAsset
+      security: [{ adminCookie: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/action' }
+      description: Exact Origin required. Publishing requires approved decision and distribution rights reference; game publication and validity additionally govern public eligibility.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, decision, publish, rights_reference, reason]
+              properties:
+                id: { type: string, format: uuid }
+                decision: { type: string, enum: [approved, rejected, withdrawn] }
+                publish: { type: boolean }
+                rights_reference: { type: string, maxLength: 4000 }
+                reason: { type: string, minLength: 1, maxLength: 2000 }
+                valid_from: { type: [string, 'null'], format: date-time }
+                valid_until: { type: [string, 'null'], format: date-time }
+      responses:
+        '200': { description: Review recorded with actor, timestamp, reason and publication decision. }
+        '400': { description: Invalid decision, missing rights or invalid dates. }
+        '401': { description: Missing valid session. }
+        '403': { description: Membership/origin denied. }
+        '404': { description: Asset not found. }
+        '503': { description: Not configured or unavailable. }
+components:
+  securitySchemes:
+    adminCookie: { type: apiKey, in: cookie, name: __Host-knowngdb-session }
+  parameters:
+    action: { name: X-KnownGDB-Action, in: header, required: true, schema: { type: string, const: admin } }
+  schemas:
+    AssetId:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string, format: uuid }
+    Upload:
+      type: object
+      required: [game_id, role, mime_type, byte_size, checksum_sha256, language_kind, language_tags, provenance, source_reference, confidence]
+      properties:
+        game_id: { type: string, format: uuid }
+        role: { type: string, enum: [header, capsule, hero, logo, icon, client_icon] }
+        mime_type: { type: string, enum: [image/png, image/jpeg] }
+        byte_size: { type: integer, minimum: 1, maximum: 16777216 }
+        checksum_sha256: { type: string, pattern: '^[a-f0-9]{64}$' }
+        language_kind: { type: string, enum: [global, localized] }
+        language_tags: { type: array, maxItems: 8, items: { type: string }, description: Global requires empty array; localized requires one or more validated real language tags. }
+        provenance: { type: string, enum: [official, community] }
+        source_reference: { type: string, minLength: 1, maxLength: 2000 }
+        confidence: { type: number, minimum: 0, maximum: 1 }

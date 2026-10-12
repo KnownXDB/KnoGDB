@@ -4,7 +4,7 @@
 
 The development service provides public health and paginated published-title
 reads, plus individual administrator sign-in and audited title/localization writes.
-It is not the complete MVP. Asset uploads/delivery, MFA, genres, organizations,
+It is not the complete MVP. Asset upload/delivery configuration, MFA, genres, organizations,
 releases, API quotas, account recovery and tested backups remain pending.
 
 Hosting is Netlify Functions/web, Supabase PostgreSQL/Auth and a private Cloudflare
@@ -87,7 +87,7 @@ No assets have been uploaded by this increment.
 The unit/security suite covers payload bounds, language validation, secure cookie
 responses, server token verification, membership revocation, CSRF, throttling and
 sanitized errors. Database rollback tests additionally verify write transactions.
-Hosted public reads return an empty published catalog; admin requests without a
+Hosted public reads now return the real, approved AION 2 title; admin requests without a
 session return 401 and mutations without the required origin return 403.
 
 Browser plugin not available: regular Playwright with local Chrome checked desktop
@@ -104,3 +104,66 @@ Preview URL and validation date are recorded in the pull request. The public API
 and admin UI are deployed explicitly from the reviewed work branch; production
 has not been promoted. Auth account creation is the remaining maintainer action
 for real administrator sign-in validation.
+
+## Asset ingestion increment (2026-10-12)
+
+Migration 20261012201644_asset_ingestion.sql is applied. The admin now includes
+original upload, language/Global classification, provenance, private preview and
+review with rights reference, reason and optional validity dates. PostgreSQL
+functions and the publication view remain service-only. Ordinary Auth users cannot
+execute them. The new native decoder dependency is sharp, pinned in the lockfile.
+
+The maintainer created a protected Netlify placeholder and a context-only API update configured the generated ASSET_SIGNING_PRIVATE_KEY privately for Deploy Previews. The API confirmed is_secret=true before and after the update. No private key was printed, stored in Git or retained in local plaintext files. ASSET_GATEWAY_ORIGIN is configured; the Worker uses only the matching public verification key. Netlify Free scopes include trusted builds/functions/runtime. The temporary marker was replaced and must never be used as a real credential.
+
+The matching API and Worker configuration has been deployed for preview validation. No files were uploaded during this increment. The existing title API and real AION 2 publication remain operational. The exact preview URL and final HTTP validation are recorded in the PR.
+
+New API routes:
+
+- GET /api/v1/games/{game_id}/assets: up to 100 published, currently valid originals;
+  optional language (global or a real tag), role and official_only filters.
+  Language matching returns exact then Global, never an unrelated language.
+- GET /api/v1/assets/{asset_id}/file: eligibility check followed by a 60-second
+  object-scoped signed redirect. Stable links do not contain storage credentials.
+- Admin /assets: list by game_id; /assets/prepare, /complete, /preview and /review
+  require live administrator authorization. Mutations require origin/action checks.
+
+Publication is a separate review action. Official provenance does not prove rights.
+File validation never rewrites originals. Each valid asset starts private/in_review.
+See ADR 0009 for byte/pixel limits, logo thresholds, grants and intake budget.
+Community intake is not open: only administrators can upload in this increment.
+No best-asset/event priority or full pagination contract is implemented yet.
+
+The public-file grant can remain usable for at most 60 seconds after withdrawal.
+Metadata/list and all new issuance honor current publication and validity immediately.
+The initial 1 GiB intake budget conservatively counts all upload reservations,
+including failed/expired ones, to avoid hiding orphaned storage. The daily cap is
+60 intents per administrator. Reconciliation, public transfer quotas, retention,
+MFA and monitored cost ceilings remain production gates.
+
+Validation: 27 unit/security tests passed. Rollback-only database checks verified
+private intake, rights requirements, future validity, approval, withdrawal,
+duplicates, auditing and revoked admin access; no synthetic assets were retained.
+Playwright/local Chrome checked 1280px desktop and 390px mobile, file selection,
+Global classification, upload completion, private preview, rights rejection and
+approval. Authorized network responses were mocked and no page runtime errors
+occurred. Real storage upload/download remains pending a real administrator-driven upload. Screenshots and temporary scripts remain outside Git.
+
+Local AION 2 original icon/header/capsule/hero files passed full decoding and the
+role policy. Its logo failed the transparency/trim policy; no file was modified.
+Its client icon is ICO: extraction is deferred and ICO is not accepted by this UI.
+
+Windows CLI deployments bundle Linux-native decoder modules explicitly. Before a
+Windows deployment, install the lockfile dependencies and make the pinned optional
+@img/sharp-linux-x64 and @img/sharp-libvips-linux-x64 packages available locally
+(e.g. npm pack the exact locked versions outside Git and extract under node_modules).
+On Linux CI/builds, npm ci installs those matching optional packages normally.
+netlify.toml treats sharp as external and includes @img modules. A hosted public
+health response confirmed the native module can load on the deployed Linux runtime;
+this is not equivalent to real file finalization. Do not skip that end-to-end check.
+
+Security advisor review on 2026-10-12: eight informational RLS-without-policy
+notices are intentional for backend-only tables. One Auth warning reports disabled
+leaked-password protection; the provider documents it as Pro-and-above functionality.
+No paid upgrade was enabled. See https://supabase.com/docs/guides/auth/password-security
+for that plan constraint. This does not remove the pending MFA/recovery production
+gates and is not reported as a zero-warning security audit.

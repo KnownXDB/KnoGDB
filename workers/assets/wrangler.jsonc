@@ -4,7 +4,20 @@
   "compatibility_date": "2026-10-12",
   "workers_dev": true,
   "r2_buckets": [
-    { "binding": "ASSETS", "bucket_name": "knowngdb" }
+    {
+      "binding": "ASSETS",
+      "bucket_name": "knowngdb"
+    }
   ],
-  "observability": { "enabled": false }
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "GRANT_PUBLIC_KEY": {
+      "kty": "RSA",
+      "n": "w7Umy3JaOX83cxh7b6eMoEz60XAbNs9pOFrYWlXYfTT6ecLpW4Z5a0PslpZAwG2zE882E8cw3JPilru7-aTyVd45ech9M6roB_dcfyGs3LqEBhzCBIMcsri0s7t4AbaQecL46bwNwjtwyXhvdMklRC5X8JH1wEIlf66RBpCXCBmnqhe6vYPA4ClioqhtP01atxLgZy5fA-46iOt42fe0mpBKHH1W9uHdvr4ZvQ28Bz56p0WYxD8MA-AW-UrFQl9yDCgjnmRHBBIko7Ql071y5zdYKnYc_HWg_k14W0ppHDxsnzDIYMxGaMGTAFBpEU8KWgVBXbtAyPk5RsShJAIxGw",
+      "e": "AQAB"
+    },
+    "UPLOAD_ORIGINS": "https://knowngdb.netlify.app"
+  }
 }

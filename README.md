@@ -11,7 +11,7 @@ priority; the domain supports multiple platforms, regions, languages and sources
 
 A hosted development preview provides published-title API reads and individual
 admin sign-in with audited title/localization editing. No official domain or
-production release is available. Asset uploads and MFA remain pending.
+production release is available. Asset intake and review are implemented for preview validation; real upload acceptance and MFA remain pending.
 See [development status](docs/DEVELOPMENT.md).
 
 ## Product scope

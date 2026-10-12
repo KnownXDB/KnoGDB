@@ -83,3 +83,13 @@ test('gateway verifies user tokens before decoding claims and sends secret only 
     await assert.rejects(()=>gateway.identity(token),/unauthorized/);
   } finally {globalThis.fetch=original;}
 });
+
+test('asset actions cannot bypass administrative session and membership checks',async()=>{
+ let called=false;
+ const assetService={admin:async()=>{called=true;return {};},public:async()=>Response.json({})};
+ const denied=fixture({allowed:async()=>false});
+ const handler=createAdminHandler(denied.gateway,undefined,assetService);
+ assert.equal((await handler(request('assets/prepare',{}))).status,403);
+ assert.equal((await handler(request('assets?game_id=00000000-0000-4000-8000-000000000001',undefined,false))).status,401);
+ assert.equal(called,false);
+});

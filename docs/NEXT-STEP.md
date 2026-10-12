@@ -1,16 +1,23 @@
-# Próximo paso
+# Next validation milestone
 
-Antes de código, concretar los contratos definidos en PRODUCT-PLAN.md y ADR 0004:
-cardinalidades, precisión de fechas, permisos, selección de assets y límites.
+The real administrator created and published a localized title, and public API
+verification confirmed its stable UUID, title, language and description.
 
-El primer bloque ejecutable debe incluir workspace, API con healthcheck,
-base relacional local, migraciones, OpenAPI, CI y scaffolding web público y
-administrativo. Incluir protección administrativa mínima desde la primera escritura.
+The asset signing key is now protected in Netlify Deploy Previews, and the Worker
+has only the corresponding public verifier. The asset workflow is implemented;
+its remaining acceptance check is a real administrator-driven upload.
 
-Criterio de cierre: crear administrativamente un título localizado con ID interno,
-consultarlo por API y verificar rechazo de escrituras sin autorización.
-No declarar descarga validada en este bloque.
+Open the latest admin preview and choose the existing title under Original assets.
+Upload one compatible original, classify its actual language or Global, inspect
+the private preview and review its source and distribution rights. Publication
+requires a published title, approved review, rights reference and active dates.
 
-El siguiente bloque incorpora archivo validado y aprobado, storage privado,
-selección contextual y descarga íntegra por API con checksum y caché verificados.
-No incluir aún ingestión masiva ni procesamiento de vídeo.
+Compare the downloaded SHA-256 with the source and confirm private/rejected/future/
+withdrawn assets do not receive new public links. Issued file links can remain
+usable for at most 60 seconds after withdrawal. Keep valid real originals; do not
+create synthetic public records for the test. Never claim permission based only
+on official provenance.
+
+Do not call asset intake validated end to end until that real flow succeeds.
+Full administrative MFA, recovery, API/transfer quotas, storage reconciliation and
+backups remain gates before production. Do not promote branches automatically.

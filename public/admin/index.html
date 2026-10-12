@@ -42,7 +42,40 @@
       </form>
     </div>
   </section>
-  <footer><a href="/">KnownGDB</a> · Development preview. Asset uploads are the next milestone.</footer>
+  <section id="assets-panel" hidden>
+    <h2>Original assets</h2>
+    <label>Asset title<select id="asset-game"><option value="">Choose a title</option></select></label>
+    <p class="hint">PNG or JPEG, up to 16 MiB. Originals stay private until reviewed. Global means no linguistic text; choose it only when the image has no language.</p>
+    <div class="workspace">
+      <form id="asset-form">
+        <h3>Upload original</h3>
+        <label>Role<select name="role"><option value="header">Header · 920 × 430</option><option value="capsule">Capsule · 600 × 900</option><option value="hero">Hero · 3840 × 1240</option><option value="logo">Logo · transparent PNG, visible dominant side ≥1280</option><option value="icon">Icon · 32 × 32</option><option value="client_icon">Client icon · 256 × 256</option></select></label>
+        <label>Original file<input name="file" type="file" accept="image/png,image/jpeg" required></label>
+        <label>Language classification<select name="language_kind"><option value="localized">Localized</option><option value="global">Global · no language</option></select></label>
+        <label>Languages (comma separated)<input name="language_tags" placeholder="en, es-419"></label>
+        <label>Provenance<select name="provenance"><option value="official">Official</option><option value="community">Community</option></select></label>
+        <label>Asset source reference<input name="source_reference" required maxlength="2000"></label>
+        <label>Asset confidence (0–1)<input name="confidence" type="number" min="0" max="1" step="0.001" value="1" required></label>
+        <button type="submit">Upload for review</button>
+        <button id="retry-asset" type="button" hidden>Retry validation</button>
+      </form>
+      <div>
+        <h3>Review assets</h3><ul id="assets"></ul>
+        <img id="asset-preview" hidden alt="Selected original asset for review">
+        <form id="review-form" hidden>
+          <p id="asset-details" class="hint"></p>
+          <label>Decision<select name="decision"><option value="approved">Approve</option><option value="rejected">Reject</option><option value="withdrawn">Withdraw</option></select></label>
+          <label class="check"><input name="publish" type="checkbox">Publish this asset</label>
+          <label>Distribution rights reference<textarea name="rights_reference" rows="2" maxlength="4000" placeholder="Permission or license reference. An official source alone is not permission."></textarea></label>
+          <label>Review reason<textarea name="reason" rows="2" required maxlength="2000"></textarea></label>
+          <label>Valid from (optional)<input name="valid_from" type="datetime-local"></label>
+          <label>Valid until (optional)<input name="valid_until" type="datetime-local"></label>
+          <button type="submit">Save review</button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <footer><a href="/">KnownGDB</a> · Development preview. Uploaded originals require review and distribution rights before publication.</footer>
 </main>
 </body>
 </html>
