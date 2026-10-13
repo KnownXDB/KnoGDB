@@ -14,15 +14,23 @@ R2 bucket. No paid plan or automatic production deployment is enabled.
 
 For interface development, run `npm run dev` and open
 http://127.0.0.1:5173/admin/. The same HTML, CSS and JavaScript used by the hosted
-admin are served directly, with a visible local-workspace banner. Reload the
-browser after editing files in `public/admin/`; restart after TypeScript changes.
+admin are built from React components in `frontend/admin`, with a visible
+local-workspace banner. Vite Fast Refresh updates components and CSS immediately;
+restart after backend TypeScript changes. Node.js 22.12 or later is required.
 The workspace starts with a sample title and supports temporary title edits,
-original uploads, previews and batch review. All data is held in memory and
+original uploads, previews and batch review through the fixture API on port 8788,
+proxied by Vite on port 5173. All data is held in memory and
 discarded on shutdown. No credentials or cloud services are used.
 This fixture mode does not validate hosted authentication or cloud integration.
 Stop with Ctrl+C. `dev:api` remains a separate public API launcher.
 
-Use Node.js 22 or later:
+React workspace browser checks covered Fast Refresh without a document reload,
+preservation of an unsaved title field, title creation, small original logos,
+native ICO previews, multiple-file upload, batch review and the rights gate.
+Desktop/mobile checks found no runtime errors or cloud requests. These checks
+exercise the local fixture adapter, not hosted authorization or remote storage.
+
+Use Node.js 22.12 or later:
 
     npm ci --ignore-scripts
     npm run verify

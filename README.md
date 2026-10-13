@@ -24,6 +24,14 @@ See [development status](docs/DEVELOPMENT.md).
 - A basic public web scaffold and a functional administration MVP.
 - Official trailers, photographs and videos in a later phase.
 
+## Local interface development
+
+Run `npm ci`, then `npm run dev`, and open http://127.0.0.1:5173/admin/.
+The React/TypeScript admin uses Vite Fast Refresh. Components and CSS live in
+`frontend/admin`; changes appear immediately without manual browser reload.
+Local data and uploads are temporary fixtures; no hosted credentials are needed.
+Node.js 22.12 or later is required. `npm run build` generates `build/web` for hosting.
+
 ## Documentation
 
 The primary README is in English. Detailed planning documents currently use
