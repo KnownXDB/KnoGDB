@@ -6,6 +6,7 @@ export default defineConfig({
   root: "frontend",
   publicDir: "../public",
   envDir: false,
+  envPrefix: [],
   plugins: [react()],
   server: {
     host: "127.0.0.1",
