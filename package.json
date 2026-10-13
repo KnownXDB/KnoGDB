@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev": "npm run build && node scripts/serve-workspace.mjs",
     "build": "tsc && node scripts/write-hosting-headers.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",

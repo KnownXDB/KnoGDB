@@ -12,6 +12,16 @@ R2 bucket. No paid plan or automatic production deployment is enabled.
 
 ## Local checks
 
+For interface development, run `npm run dev` and open
+http://127.0.0.1:5173/admin/. The same HTML, CSS and JavaScript used by the hosted
+admin are served directly, with a visible local-workspace banner. Reload the
+browser after editing files in `public/admin/`; restart after TypeScript changes.
+The workspace starts with a sample title and supports temporary title edits,
+original uploads, previews and batch review. All data is held in memory and
+discarded on shutdown. No credentials or cloud services are used.
+This fixture mode does not validate hosted authentication or cloud integration.
+Stop with Ctrl+C. `dev:api` remains a separate public API launcher.
+
 Use Node.js 22 or later:
 
     npm ci --ignore-scripts
