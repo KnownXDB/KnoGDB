@@ -8,6 +8,11 @@
   },
   "scripts": {
     "dev": "npm run build:server && node scripts/dev.mjs",
+    "dev:check": "node scripts/local-command.mjs check",
+    "dev:services": "node scripts/local-command.mjs start",
+    "dev:stop": "node scripts/local-command.mjs stop",
+    "dev:admin": "npm run build:server && node scripts/local-admin.mjs",
+    "test:local": "npm run build:server && node scripts/test-local.mjs",
     "build:server": "tsc",
     "build": "npm run build:server && tsc -p frontend/tsconfig.json && node scripts/write-hosting-headers.mjs && vite build",
     "typecheck": "tsc --noEmit && tsc -p frontend/tsconfig.json",
@@ -17,9 +22,14 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "miniflare": "4.20260730.0",
+    "pg": "8.23.1",
+    "selfsigned": "5.5.0",
+    "supabase": "2.120.0",
     "typescript": "^5.9.3",
     "vite": "8.3.4"
   },
@@ -31,5 +41,12 @@
   "optionalDependencies": {
     "@img/sharp-libvips-linux-x64": "1.3.4",
     "@img/sharp-linux-x64": "0.35.5"
+  },
+  "overrides": {
+    "miniflare": {
+      "sharp": "$sharp",
+      "workerd": "1.20261012.1",
+      "undici": "7.29.1"
+    }
   }
 }

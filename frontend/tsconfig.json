@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "types": ["vite/client"]
   },
-  "include": ["admin/**/*.ts", "admin/**/*.tsx"]
+  "include": ["admin/**/*.ts", "admin/**/*.tsx", "web/**/*.tsx"]
 }

@@ -1,6 +1,6 @@
 # 0014: React admin with Vite Fast Refresh
 
-Status: accepted. Updates ADR 0013's manual browser reload workflow.
+Status: React/Vite accepted; the fixture-only runtime is superseded by ADR 0015.
 
 Use React and TypeScript components for sign-in, title/localization editing,
 original intake, previews and batch review. Vite provides Fast Refresh and CSS

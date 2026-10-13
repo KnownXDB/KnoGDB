@@ -1,6 +1,6 @@
 # 0013: Local interface workspace
 
-Status: accepted. The source location and reload workflow are updated by ADR 0014.
+Status: superseded by ADR 0015. The fixture runtime has been removed.
 
 Serve the existing public/admin files on loopback with a visibly identified,
 in-memory fixture adapter. No hosted credentials or cloud adapters are loaded.

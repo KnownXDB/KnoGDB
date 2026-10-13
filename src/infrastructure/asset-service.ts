@@ -3,6 +3,7 @@ import { assetMetadata, maxAssetBytes, roles, validateAsset } from '../domain/as
 import { languageRank, parseAssetLanguage } from '../domain/asset-language.js';
 import { signGrant } from './asset-grants.js';
 import type { Identity } from './admin-gateway.js';
+import {serviceOrigin,serviceHeaders,type RuntimeMode} from './runtime-policy.js';
 export interface AssetService {
   admin(actor:Identity,route:string,body:Record<string,unknown>,origin:string):Promise<unknown>;
   public(request:Request):Promise<Response>;
@@ -20,13 +21,12 @@ async function limitedBytes(response:Response,limit:number) {
     if(size>limit){await reader.cancel();throw new Error('invalid_asset');}chunks.push(value);}
   if(size!==limit)throw new Error('invalid_asset');return Buffer.concat(chunks);
 }
-export function createAssetService(projectUrl:string,secret:string,workerUrl:string,privateKey:string):AssetService {
-  const project=new URL(projectUrl),worker=new URL(workerUrl);
-  for(const url of [project,worker])if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('service_not_configured');
-  if(!secret.startsWith('sb_secret_')||!privateKey)throw new Error('service_not_configured');
+export function createAssetService(projectUrl:string,secret:string,workerUrl:string,privateKey:string,mode:RuntimeMode='hosted'):AssetService {
+  const project=serviceOrigin(projectUrl,mode),worker=serviceOrigin(workerUrl,mode),credentials=serviceHeaders(secret,mode);
+  if(!privateKey)throw new Error('service_not_configured');
   async function remote(path:string,body?:unknown) {
     const response=await fetch(new URL(path,project),{method:body===undefined?'GET':'POST',
-      headers:{apikey:secret,'Content-Type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)}),
+      headers:{...credentials,'Content-Type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)}),
       redirect:'error',signal:AbortSignal.timeout(10000)});
     if(!response.ok){const failure=await response.json().catch(()=>({})) as {message?:string;code?:string};
       const known=['admin_forbidden','invalid_request','game_not_found','upload_not_found','asset_not_found','duplicate_asset','rate_limited','storage_budget_reached','invalid_asset'];

@@ -1,14 +1,8 @@
 import type { CatalogReader, PublishedGame } from '../api/handler.js';
+import {serviceOrigin,serviceHeaders,type RuntimeMode} from './runtime-policy.js';
 
-export function createCatalogReader(projectUrl: string, serviceKey: string): CatalogReader {
-  if (!serviceKey.startsWith('sb_secret_') || serviceKey.length < 20) {
-    throw new Error('Server secret key required');
-  }
-  const origin = new URL(projectUrl);
-  if (origin.protocol !== 'https:' || origin.username || origin.password ||
-      origin.pathname !== '/' || origin.search || origin.hash) {
-    throw new Error('Invalid database gateway origin');
-  }
+export function createCatalogReader(projectUrl: string, serviceKey: string,mode:RuntimeMode='hosted'): CatalogReader {
+  const origin=serviceOrigin(projectUrl,mode),headers=serviceHeaders(serviceKey,mode);
   return {
     async listPublishedGames(limit, offset) {
       const url = new URL('/rest/v1/published_games', origin);
@@ -17,7 +11,7 @@ export function createCatalogReader(projectUrl: string, serviceKey: string): Cat
       url.searchParams.set('limit', String(limit));
       url.searchParams.set('offset', String(offset));
       const response = await fetch(url, {
-        headers: { apikey: serviceKey },
+        headers,
         signal: AbortSignal.timeout(5000),
         redirect: 'error',
       });

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { GameInput } from '../domain/game-input.js';
+import {serviceOrigin,serviceHeaders,type RuntimeMode} from './runtime-policy.js';
 
 export interface Identity { userId: string; sessionId: string; }
 export interface AdminGateway {
@@ -16,12 +17,10 @@ export function bucketHash(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-export function createAdminGateway(projectUrl: string, secret: string): AdminGateway {
-  const origin = new URL(projectUrl);
-  if (origin.protocol !== 'https:' || origin.username || origin.password || origin.pathname !== '/' ||
-      origin.search || origin.hash || !secret.startsWith('sb_secret_')) throw new Error('service_not_configured');
+export function createAdminGateway(projectUrl: string, secret: string,mode:RuntimeMode='hosted'): AdminGateway {
+  const origin=serviceOrigin(projectUrl,mode),credentials=serviceHeaders(secret,mode);
   async function remote(path: string, body?: unknown, token?: string): Promise<unknown> {
-    const headers: Record<string,string> = { apikey: secret, 'Content-Type': 'application/json' };
+    const headers: Record<string,string> = { ...credentials, 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
     const response = await fetch(new URL(path, origin), {
       method: body === undefined ? 'GET' : 'POST', headers,

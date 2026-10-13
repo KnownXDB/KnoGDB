@@ -62,7 +62,7 @@ export function App() {
     <main>
       {import.meta.env.DEV && (
         <p className="local-banner">
-          LOCAL WORKSPACE · Temporary data · No connection to hosted services
+          LOCAL DEVELOPMENT · Persistent local database and assets
         </p>
       )}
       <header>

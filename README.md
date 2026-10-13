@@ -11,7 +11,9 @@ priority; the domain supports multiple platforms, regions, languages and sources
 
 A hosted development preview provides published-title API reads and individual
 admin sign-in with audited title/localization editing. No official domain or
-production release is available. Asset intake and review are implemented for preview validation; real upload acceptance and MFA remain pending.
+production release is available. The implemented application can also run entirely
+locally with real authentication, database and persistent asset storage. Hosted
+upgrade acceptance and production MFA/recovery remain pending.
 See [development status](docs/DEVELOPMENT.md).
 
 ## Product scope
@@ -26,11 +28,15 @@ See [development status](docs/DEVELOPMENT.md).
 
 ## Local interface development
 
-Run `npm ci`, then `npm run dev`, and open http://127.0.0.1:5173/admin/.
-The React/TypeScript admin uses Vite Fast Refresh. Components and CSS live in
-`frontend/admin`; changes appear immediately without manual browser reload.
-Local data and uploads are temporary fixtures; no hosted credentials are needed.
-Node.js 22.12 or later is required. `npm run build` generates `build/web` for hosting.
+With Node.js 22.12+ and Docker running, install dependencies using
+`npm ci --ignore-scripts`, then run `npm run dev` and open
+https://127.0.0.1:5173/admin/. This starts the real API, local PostgreSQL/Auth,
+versioned migrations, a persistent local R2 asset gateway and React/Vite frontends.
+Create your own local administrator with `npm run dev:admin`.
+Components/CSS use Fast Refresh; backend and Worker edits rebuild automatically.
+No hosted credentials or deployment are required. See
+[complete local development](docs/LOCAL-DEVELOPMENT.md) for setup, TLS, persistence,
+verification and manual deployment. `npm run build` generates `build/web` for Netlify.
 
 ## Documentation
 
